@@ -3,7 +3,6 @@ import AnimatedPanel from './';
 
 
 export default (
-  <AnimatedPanel>
   <div>
       <div>
       <p>Lorem ipsum dolor sit amet, sit quod odio intellegebat no. Causae labitur sadipscing ne eos, vis tota eirmod
@@ -91,15 +90,7 @@ export default (
        reprehendunt id eum. Solum clita quo id. Nisl sale inimicus ea sea, per quem timeam tamquam ad. blah</p>
 
       </div>
-
-       <div id="animated--panel">
-        <div className="animated--panel--container">
-        <span>Advertisement</span>
-        <div id="animated--panel--container--inner">
-          <img src="http://lorempixel.com/g/1190/669/city"/>
-        </div>
-        </div>
-      </div>
+      <AnimatedPanel/>
 
       <div>
       <p>Lorem ipsum dolor sit amet, sit quod odio intellegebat no. Causae labitur sadipscing ne eos, vis tota eirmod
@@ -136,6 +127,8 @@ export default (
         Pri diceret suscipiantur interpretaris in, an cibo nullam labitur quo. An accusata evertitur rationibus vis,
          quo quis insolens pertinax ex, est option pertinacia at.</p>
 
+         <AnimatedPanel/>
+
       <p>Mea congue soleat voluptatum at, vix detraxit mediocritatem at. At vis singulis referrentur. Sea vivendum
        imperdiet cu, id aeterno prodesset theophrastus ius, maiorum adipisci at mea. Eu cum erant laboramus constituam,
         mel no viderer inermis concludaturque. Ea eum omnis propriae, ea justo doming mediocrem pri. Nam eu paulo
@@ -153,6 +146,5 @@ export default (
       Est ne quod prima ancillae.</p>
       </div>
       </div>
-  </AnimatedPanel>
 );
 
