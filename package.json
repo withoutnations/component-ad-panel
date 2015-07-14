@@ -14,19 +14,10 @@
   },
   "main": "index.js",
   "files": [
-  "index.js",
-  "index.css"
+    "*.js",
+    "*.css",
+    "assets/*"
   ],
-  "browserify": {
-    "transform": [
-      [
-        "babelify",
-        {
-          "stage": 0
-        }
-      ]
-    ]
-  },
   "eslintConfig": {
     "extends": "strict/react"
   },
@@ -54,7 +45,7 @@
       {
         "contents": "chai.should();mocha.setup('bdd');"
       },
-      "/test/index.es6?debug&external=react",
+      "/test/index.es6?babelifydebug&external=react",
       {
         "contents": "mocha.checkLeaks();mocha.run();"
       }
@@ -78,16 +69,13 @@
     "test:watch": "npm run test:base -- -wR min"
   },
   "dependencies": {
-    "@economist/component-devpack": "^1.2.0",
     "react": "^0.13.3"
   },
   "devDependencies": {
-    "@economist/component-devpack": "^2.1.1",
+    "@economist/component-devpack": "^2.3.0",
     "@economist/component-devserver": "^2.0.0",
     "@economist/component-testharness": "^1.1.0",
     "babel": "^5.5.8",
-    "babelify": "^6.1.2",
-    "browserify": "^10.2.4",
     "eslint": "^0.24.0",
     "eslint-config-strict": "^2.4.0",
     "eslint-plugin-filenames": "^0.1.1",
@@ -97,10 +85,6 @@
     "mocha": "^2.2.5",
     "pre-commit": "^1.0.10"
   },
-  "files": [
-    "index.js",
-    "index.css"
-  ],
   "pre-commit": [
     "lint"
   ]
