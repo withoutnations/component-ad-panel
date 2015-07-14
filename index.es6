@@ -62,7 +62,7 @@ export default class AnimatedPanel extends React.Component {
         <span ref="title" className="AnimatedPanel--title">Advertisement</span>
         <div ref="panel" className="AnimatedPanel--panel">
           <div ref="panelInner" className="AnimatedPanel--panel-inner">
-            <img src="http://lorempixel.com/g/1024/768/city"/>
+            <img src="http://lorempixel.com/g/1024/768/cats"/>
           </div>
         </div>
       </div>
