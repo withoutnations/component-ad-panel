@@ -17,14 +17,14 @@ var _react2 = _interopRequireDefault(_react);
 // <div id='gpt_resp_mpu_inline_ad'></div>
 
 var AnimatedPanel = (function (_React$Component) {
+  _inherits(AnimatedPanel, _React$Component);
+
   function AnimatedPanel() {
     _classCallCheck(this, AnimatedPanel);
 
     _React$Component.call(this);
     this.showElementWhenInView = this.showElementWhenInView.bind(this);
   }
-
-  _inherits(AnimatedPanel, _React$Component);
 
   AnimatedPanel.prototype.componentDidMount = function componentDidMount() {
     this.generateAd();
