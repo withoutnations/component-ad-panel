@@ -51,7 +51,8 @@ export default class AnimatedPanel extends React.Component {
   generateAd() {
     if (window.googletag) {
       window.googletag.cmd.push(() => {
-        window.googletag.display('gpt_resp_mpu_inline_ad');
+        // window.googletag.display('gpt_resp_mpu_inline_ad');
+        window.googletag.display('div-gpt-ad-1436380903336-0');
       });
     }
   }
@@ -62,10 +63,11 @@ export default class AnimatedPanel extends React.Component {
         <span ref="title" className="AnimatedPanel--title">Advertisement</span>
         <div ref="panel" className="AnimatedPanel--panel">
           <div ref="panelInner" className="AnimatedPanel--panel-inner">
-            <img src="http://lorempixel.com/g/1024/768/cats"/>
+          <div id="div-gpt-ad-1436380903336-0"></div>
           </div>
         </div>
       </div>
     );
   }
 }
+
