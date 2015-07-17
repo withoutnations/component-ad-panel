@@ -81,7 +81,7 @@ var AnimatedPanel = (function (_React$Component) {
         _react2['default'].createElement(
           'div',
           { ref: 'panelInner', className: 'AnimatedPanel--panel-inner' },
-          _react2['default'].createElement('img', { src: 'http://lorempixel.com/g/1024/768/city' })
+          _react2['default'].createElement('img', { src: 'http://lorempixel.com/g/1024/768/cats' })
         )
       )
     );
