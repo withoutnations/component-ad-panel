@@ -12,7 +12,7 @@
 }
 
 .AnimatedPanel--panel {
-  padding: 4% 2% 4% 2%;
+  padding: 32px 2% 32px 2%;
 }
 
 .AnimatedPanel--title {
@@ -25,7 +25,6 @@
 .AnimatedPanel--container iframe,  .AnimatedPanel--container img{
   margin: 0 auto;
   display: block;
-  width: 100%;
   height: auto;
 }
 

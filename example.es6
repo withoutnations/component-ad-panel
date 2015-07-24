@@ -1,6 +1,27 @@
 import React from 'react';
 import AnimatedPanel from './index.es6';
 
+/* global window: false */
+/* global document: false */
+
+((run) => {
+  if (!run) {
+    return;
+  }
+  window.googletag = window.googletag || {};
+  window.googletag.cmd = window.googletag.cmd || [];
+  (function createScript() {
+    const gads = document.createElement('script');
+    gads.async = true;
+    gads.type = 'text/javascript';
+    const useSSL = 'https:' === document.location.protocol;
+    gads.src = (useSSL ? 'https:' : 'http:') +
+    '//www.googletagservices.com/tag/js/gpt.js';
+    const node = document.getElementsByTagName('script')[0];
+    node.parentNode.insertBefore(gads, node);
+  })();
+})(typeof window !== 'undefined');
+
 
 export default (
   <div>
@@ -89,9 +110,9 @@ export default (
       <p>No cum omnis epicurei, an elitr ludus qualisque cum. Ludus alienum iudicabit id qui. Convenire incorrupte
        reprehendunt id eum. Solum clita quo id. Nisl sale inimicus ea sea, per quem timeam tamquam ad. blah</p>
 
-      </div>
-      <AnimatedPanel/>
 
+      </div>
+      <AnimatedPanel adTag="/5605/teg.fmsq/wdif/busi" />
       <div>
       <p>Lorem ipsum dolor sit amet, sit quod odio intellegebat no. Causae labitur sadipscing ne eos, vis tota eirmod
        debitis ex. Sit ubique nominavi erroribus in, stet lorem tation ea pri. Ut movet gubergren est, quo euismod
@@ -127,8 +148,6 @@ export default (
         Pri diceret suscipiantur interpretaris in, an cibo nullam labitur quo. An accusata evertitur rationibus vis,
          quo quis insolens pertinax ex, est option pertinacia at.</p>
 
-         <AnimatedPanel/>
-
       <p>Mea congue soleat voluptatum at, vix detraxit mediocritatem at. At vis singulis referrentur. Sea vivendum
        imperdiet cu, id aeterno prodesset theophrastus ius, maiorum adipisci at mea. Eu cum erant laboramus constituam,
         mel no viderer inermis concludaturque. Ea eum omnis propriae, ea justo doming mediocrem pri. Nam eu paulo
@@ -147,4 +166,3 @@ export default (
       </div>
       </div>
 );
-

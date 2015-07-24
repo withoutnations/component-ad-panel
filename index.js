@@ -61,7 +61,8 @@ var AnimatedPanel = (function (_React$Component) {
   AnimatedPanel.prototype.generateAd = function generateAd() {
     if (window.googletag) {
       window.googletag.cmd.push(function () {
-        window.googletag.display('gpt_resp_mpu_inline_ad');
+        // window.googletag.display('gpt_resp_mpu_inline_ad');
+        window.googletag.display('div-gpt-ad-1436380903336-0');
       });
     }
   };
@@ -81,7 +82,7 @@ var AnimatedPanel = (function (_React$Component) {
         _react2['default'].createElement(
           'div',
           { ref: 'panelInner', className: 'AnimatedPanel--panel-inner' },
-          _react2['default'].createElement('img', { src: 'http://lorempixel.com/g/1024/768/cats' })
+          _react2['default'].createElement('div', { id: 'div-gpt-ad-1436380903336-0' })
         )
       )
     );

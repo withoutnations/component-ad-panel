@@ -2,23 +2,32 @@ import React from 'react';
 
 /* global window: false */
 /* global document: false */
-// <div id='gpt_resp_mpu_inline_ad'></div>
 
 export default class AnimatedPanel extends React.Component {
 
+  static get propTypes() {
+    return {
+      adTag: React.PropTypes.string,
+    };
+  }
 
   constructor() {
     super();
     this.showElementWhenInView = this.showElementWhenInView.bind(this);
   }
 
+  componentWillMount() {
+    this.setState({ tagId: `googlead-${(Math.random() * 1e17) .toString(16)}` });
+  }
+
   componentDidMount() {
-    this.generateAd();
+    if (this.state && this.state.tagId) {
+      this.generateAd();
+    }
     window.addEventListener('scroll', this.showElementWhenInView);
     window.addEventListener('resize', this.showElementWhenInView);
     this.showElementWhenInView();
   }
-
 
   componentWillUnmount() {
     this.cleanupEventListeners();
@@ -50,24 +59,38 @@ export default class AnimatedPanel extends React.Component {
 
   generateAd() {
     if (window.googletag) {
-      window.googletag.cmd.push(() => {
-        // window.googletag.display('gpt_resp_mpu_inline_ad');
-        window.googletag.display('div-gpt-ad-1436380903336-0');
+      const googleTag = window.googletag;
+      googleTag.cmd.push(() => {
+        googleTag.defineSlot(
+          this.props.adTag,
+          [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ],
+          this.state.tagId).addService(googleTag.pubads());
+        googleTag.pubads().enableSingleRequest();
+        googleTag.enableServices();
+        googleTag.display(this.state.tagId);
       });
+    } else {
+      throw new Error('window.googletag not present, please put googletag js into html');
     }
   }
 
   render() {
+    let tag;
+    if (this.state && this.state.tagId) {
+      tag = (<div id={this.state.tagId}></div>);
+    }
     return (
       <div ref="container" className="AnimatedPanel--container">
         <span ref="title" className="AnimatedPanel--title">Advertisement</span>
         <div ref="panel" className="AnimatedPanel--panel">
           <div ref="panelInner" className="AnimatedPanel--panel-inner">
-          <div id="div-gpt-ad-1436380903336-0"></div>
+          {tag}
+          <div id="testhis"></div>
           </div>
         </div>
       </div>
     );
   }
 }
+
 
