@@ -92,5 +92,3 @@ export default class AnimatedPanel extends React.Component {
     );
   }
 }
-
-
