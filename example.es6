@@ -1,26 +1,23 @@
 import React from 'react';
 import AnimatedPanel from './index.es6';
 
-/* global window: false */
-/* global document: false */
-
-((run) => {
-  if (!run) {
-    return;
-  }
-  window.googletag = window.googletag || {};
-  window.googletag.cmd = window.googletag.cmd || [];
-  (function createScript() {
-    const gads = document.createElement('script');
-    gads.async = true;
-    gads.type = 'text/javascript';
-    const useSSL = 'https:' === document.location.protocol;
-    gads.src = (useSSL ? 'https:' : 'http:') +
-    '//www.googletagservices.com/tag/js/gpt.js';
-    const node = document.getElementsByTagName('script')[0];
-    node.parentNode.insertBefore(gads, node);
-  })();
-})(typeof window !== 'undefined');
+// ((run) => {
+//   if (!run) {
+//     return;
+//   }
+//   window.googletag = window.googletag || {};
+//   window.googletag.cmd = window.googletag.cmd || [];
+//   (function createScript() {
+//     const gads = document.createElement('script');
+//     gads.async = true;
+//     gads.type = 'text/javascript';
+//     const useSSL = 'https:' === document.location.protocol;
+//     gads.src = (useSSL ? 'https:' : 'http:') +
+//     '//www.googletagservices.com/tag/js/gpt.js';
+//     const node = document.getElementsByTagName('script')[0];
+//     node.parentNode.insertBefore(gads, node);
+//   })();
+// })(typeof window !== 'undefined');
 
 
 export default (
