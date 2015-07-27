@@ -85,7 +85,6 @@ export default class AnimatedPanel extends React.Component {
         <div ref="panel" className="AnimatedPanel--panel">
           <div ref="panelInner" className="AnimatedPanel--panel-inner">
           {tag}
-          <div id="testhis"></div>
           </div>
         </div>
       </div>
