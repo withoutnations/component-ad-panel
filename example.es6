@@ -1,6 +1,5 @@
 import React from 'react';
 import AnimatedPanel from './index.es6';
-
 // ((run) => {
 //   if (!run) {
 //     return;
