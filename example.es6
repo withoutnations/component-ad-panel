@@ -19,7 +19,6 @@ import AnimatedPanel from './index.es6';
 //   })();
 // })(typeof window !== 'undefined');
 
-
 export default (
   <div>
       <div>
@@ -106,8 +105,6 @@ export default (
 
       <p>No cum omnis epicurei, an elitr ludus qualisque cum. Ludus alienum iudicabit id qui. Convenire incorrupte
        reprehendunt id eum. Solum clita quo id. Nisl sale inimicus ea sea, per quem timeam tamquam ad. blah</p>
-
-
       </div>
       <AnimatedPanel adTag="/5605/teg.fmsq/wdif/busi" />
       <div>

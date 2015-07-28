@@ -58,18 +58,24 @@ export default class AnimatedPanel extends React.Component {
   }
 
   generateAd() {
-    if (window.googletag) {
+    if ((window.googletag) && (this.props.adTag)) {
       const googleTag = window.googletag;
       googleTag.cmd.push(() => {
+        const mappingAd = window.googletag.sizeMapping().addSize([ 980, 200 ], [ 1024, 768 ])
+        .addSize([ 0, 0 ], [ 300, 250 ]).build();
         googleTag.defineSlot(
           this.props.adTag,
           [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ],
-          this.state.tagId).addService(googleTag.pubads());
+          this.state.tagId).defineSizeMapping(mappingAd)
+        .setTargeting('resp_mpu_inline_ad', 'refresh')
+        .addService(googleTag.pubads());
         googleTag.pubads().enableSingleRequest();
         googleTag.enableServices();
         googleTag.display(this.state.tagId);
       });
     } else {
+      const adToHide = React.findDOMNode(this.refs.container);
+      adToHide.style.display = 'none';
       throw new Error('window.googletag not present, please put googletag js into html');
     }
   }
