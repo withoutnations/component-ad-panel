@@ -1,7 +1,6 @@
 @import '@economist/component-font-neutra2';
 
 .AnimatedPanel--container {
-  font-family: Neutra2Display;
   width: 100%;
   height: 100%;
   background-color: #F0F0F0;
@@ -22,7 +21,10 @@
   padding: 10px;
   position: absolute;
   color:  rgba(0,0,0,0.5);
-  font-size: 14px;
+  font-family: Neutra2Display;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 0 20px;
 }
 
 .AnimatedPanel--panel-inner {
