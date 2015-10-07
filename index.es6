@@ -87,12 +87,15 @@ export default class AnimatedPanel extends React.Component {
           .addSize([ 980, 200 ], [ 1024, 768 ])
           .addSize([ 0, 0 ], [ 300, 250 ])
           .build();
-        googleTag.defineSlot(
+        const slot = googleTag.defineSlot(
           this.props.adTag,
           this.props.sizes,
-          this.state.tagId).defineSizeMapping(mappingAd)
-        .setTargeting('resp_mpu_inline_ad', 'refresh')
-        .addService(googleTag.pubads());
+          this.state.tagId)
+          .setTargeting('resp_mpu_inline_ad', 'refresh')
+          .addService(googleTag.pubads());
+        if (this.props.sizes && this.props.sizes.length > 1) {
+          slot.defineSizeMapping(mappingAd)
+        }
         googleTag.pubads().enableSingleRequest();
         googleTag.enableServices();
         googleTag.display(this.state.tagId);
