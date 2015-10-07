@@ -8,6 +8,7 @@ export default class AnimatedPanel extends React.Component {
     return {
       adTag: React.PropTypes.string,
       lazyLoad: React.PropTypes.bool,
+      lazyLoadMargin: React.PropTypes.number,
       sizes: React.PropTypes.arrayOf(React.PropTypes.array),
       reserveHeight: React.PropTypes.number,
     };
@@ -16,6 +17,7 @@ export default class AnimatedPanel extends React.Component {
   static get defaultProps() {
     return {
       lazyLoad: true,
+      lazyLoadMargin: 350,
       sizes: [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ]
     }
   }
@@ -26,7 +28,10 @@ export default class AnimatedPanel extends React.Component {
   }
 
   componentWillMount() {
-    this.setState({ tagId: `googlead-${(Math.random() * 1e17) .toString(16)}` });
+    this.setState({
+      tagId: `googlead-${(Math.random() * 1e17) .toString(16)}`,
+      adGenerated: false,
+    });
   }
 
   componentDidMount() {
@@ -43,7 +48,7 @@ export default class AnimatedPanel extends React.Component {
         document.head.appendChild(gads);
       }
     }
-    if (!this.props.lazyLoad && this.state && this.state.tagId) {
+    if (!this.props.lazyLoad && this.state && this.state.tagId && !this.state.adGenerated) {
       this.generateAd();
     }
     window.addEventListener('scroll', this.showElementWhenInView);
@@ -55,18 +60,22 @@ export default class AnimatedPanel extends React.Component {
     this.cleanupEventListeners();
   }
 
-  isElementInViewport(elm) {
+  isElementInViewport(elm, margin = 0) {
     const rect = React.findDOMNode(elm).getBoundingClientRect();
-    return rect.bottom > 0 &&
-      rect.right > 0 &&
-      rect.left < (window.innerWidth || document.documentElement.clientWidth) &&
-      rect.top < (window.innerHeight || document.documentElement.clientHeight);
+    return rect.bottom > -margin &&
+      rect.right > -margin &&
+      rect.left < (window.innerWidth || document.documentElement.clientWidth) + margin &&
+      rect.top < (window.innerHeight || document.documentElement.clientHeight) + margin;
   }
 
   showElementWhenInView() {
     const containerElement = this.refs.container;
+    if (!this.state.adGenerated &&
+        this.props.lazyLoad &&
+        this.isElementInViewport(containerElement, this.props.lazyLoadMargin)) {
+      this.generateAd();
+    }
     if (this.isElementInViewport(containerElement) === true) {
-      if (this.props.lazyLoad) { this.generateAd(); }
       const targetContainerElement = React.findDOMNode(containerElement);
       targetContainerElement.style.opacity = 1;
       targetContainerElement.style.transform = 'translateY(0px)';
@@ -81,6 +90,7 @@ export default class AnimatedPanel extends React.Component {
   }
 
   generateAd() {
+    this.setState({ adGenerated: true })
     if ((window.googletag) && (this.props.adTag)) {
       const googleTag = window.googletag;
       googleTag.cmd.push(() => {
