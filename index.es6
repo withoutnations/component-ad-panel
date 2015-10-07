@@ -21,6 +21,18 @@ export default class AnimatedPanel extends React.Component {
 
   componentDidMount() {
     if (this.state && this.state.tagId) {
+      if (typeof window !== 'undefined' && typeof document !== 'undefined' &&
+          typeof window.googletag === 'undefined') {
+        /* global window document */
+        window.googletag = { cmd: [] };
+        const gads = document.createElement('script');
+        gads.async = true;
+        gads.type = 'text/javascript';
+        const useSSL = 'https:' === document.location.protocol;
+        gads.src = (useSSL ? 'https:' : 'http:') + '//www.googletagservices.com/tag/js/gpt.js';
+        const node = document.getElementsByTagName('script')[0];
+        node.parentNode.insertBefore(gads, node);
+      }
       this.generateAd();
     }
     window.addEventListener('scroll', this.showElementWhenInView);
