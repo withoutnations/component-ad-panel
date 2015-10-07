@@ -8,12 +8,14 @@ export default class AnimatedPanel extends React.Component {
     return {
       adTag: React.PropTypes.string,
       lazyLoad: React.PropTypes.bool,
+      sizes: React.PropTypes.arrayOf(React.PropTypes.array),
     };
   }
 
   static get defaultProps() {
     return {
       lazyLoad: true,
+      sizes: [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ]
     }
   }
 
@@ -81,11 +83,13 @@ export default class AnimatedPanel extends React.Component {
     if ((window.googletag) && (this.props.adTag)) {
       const googleTag = window.googletag;
       googleTag.cmd.push(() => {
-        const mappingAd = window.googletag.sizeMapping().addSize([ 980, 200 ], [ 1024, 768 ])
-        .addSize([ 0, 0 ], [ 300, 250 ]).build();
+        const mappingAd = window.googletag.sizeMapping()
+          .addSize([ 980, 200 ], [ 1024, 768 ])
+          .addSize([ 0, 0 ], [ 300, 250 ])
+          .build();
         googleTag.defineSlot(
           this.props.adTag,
-          [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ],
+          this.props.sizes,
           this.state.tagId).defineSizeMapping(mappingAd)
         .setTargeting('resp_mpu_inline_ad', 'refresh')
         .addService(googleTag.pubads());
