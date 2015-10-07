@@ -7,7 +7,14 @@ export default class AnimatedPanel extends React.Component {
   static get propTypes() {
     return {
       adTag: React.PropTypes.string,
+      lazyLoad: React.PropTypes.bool,
     };
+  }
+
+  static get defaultProps() {
+    return {
+      lazyLoad: true,
+    }
   }
 
   constructor(...args) {
@@ -32,6 +39,8 @@ export default class AnimatedPanel extends React.Component {
         gads.src = (useSSL ? 'https:' : 'http:') + '//www.googletagservices.com/tag/js/gpt.js';
         document.head.appendChild(gads);
       }
+    }
+    if (!this.props.lazyLoad && this.state && this.state.tagId) {
       this.generateAd();
     }
     window.addEventListener('scroll', this.showElementWhenInView);
@@ -54,6 +63,7 @@ export default class AnimatedPanel extends React.Component {
   showElementWhenInView() {
     const containerElement = this.refs.container;
     if (this.isElementInViewport(containerElement) === true) {
+      if (this.props.lazyLoad) { this.generateAd(); }
       const targetContainerElement = React.findDOMNode(containerElement);
       targetContainerElement.style.opacity = 1;
       targetContainerElement.style.transform = 'translateY(0px)';
