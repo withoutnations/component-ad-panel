@@ -88,7 +88,7 @@ describe('AnimatedPanel', () => {
     it('call cleanupEventListeners', () => {
       chai.spy.on(AnimatedPanel.prototype, 'cleanupEventListeners');
 
-      const element = React.createElement(AnimatedPanel);
+      const element = new AnimatedPanel({});
       element.componentWillUnmount();
 
       element.cleanupEventListeners
