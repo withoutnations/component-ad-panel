@@ -10,8 +10,8 @@ export default class AnimatedPanel extends React.Component {
     };
   }
 
-  constructor() {
-    super();
+  constructor(...args) {
+    super(...args);
     this.showElementWhenInView = this.showElementWhenInView.bind(this);
   }
 
