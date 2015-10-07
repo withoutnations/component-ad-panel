@@ -96,7 +96,9 @@ export default class AnimatedPanel extends React.Component {
     } else {
       const adToHide = React.findDOMNode(this.refs.container);
       adToHide.style.display = 'none';
-      throw new Error('window.googletag not present, please put googletag js into html');
+      if (typeof console !== 'undefined' && console.error) {
+        console.error('window.googletag not present, please put googletag js into html');
+      }
     }
   }
 
