@@ -9,6 +9,7 @@ export default class AnimatedPanel extends React.Component {
       adTag: React.PropTypes.string,
       lazyLoad: React.PropTypes.bool,
       sizes: React.PropTypes.arrayOf(React.PropTypes.array),
+      reserveHeight: React.PropTypes.number,
     };
   }
 
@@ -112,7 +113,7 @@ export default class AnimatedPanel extends React.Component {
   render() {
     let tag;
     if (this.state && this.state.tagId) {
-      tag = (<div id={this.state.tagId}></div>);
+      tag = (<div id={this.state.tagId} style={{ minHeight: this.props.reserveHeight || undefined }}></div>);
     }
     return (
       <div ref="container" className="AnimatedPanel--container">
