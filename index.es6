@@ -10,8 +10,8 @@ export default class AnimatedPanel extends React.Component {
     };
   }
 
-  constructor() {
-    super();
+  constructor(...args) {
+    super(...args);
     this.showElementWhenInView = this.showElementWhenInView.bind(this);
   }
 
@@ -21,6 +21,17 @@ export default class AnimatedPanel extends React.Component {
 
   componentDidMount() {
     if (this.state && this.state.tagId) {
+      /* global window document */
+      if (typeof window !== 'undefined' && window.document &&
+          !window.googletag) {
+        window.googletag = { cmd: [] };
+        const gads = document.createElement('script');
+        gads.async = true;
+        gads.type = 'text/javascript';
+        const useSSL = 'https:' === window.location.protocol;
+        gads.src = (useSSL ? 'https:' : 'http:') + '//www.googletagservices.com/tag/js/gpt.js';
+        document.head.appendChild(gads);
+      }
       this.generateAd();
     }
     window.addEventListener('scroll', this.showElementWhenInView);
