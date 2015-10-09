@@ -1,6 +1,6 @@
 {
-  "name": "@economist/component-animatedpanel",
-  "version": "2.1.8",
+  "name": "@economist/ad-panel",
+  "version": "1.0.0",
   "description": "An advert panel using GPT tags",
   "author": "The Economist (http://economist.com)",
   "license": "ISC",
@@ -45,6 +45,9 @@
       {
         "src": "./node_modules/mocha/mocha.css"
       },
+      {
+        "contents": "</style> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0\"> <style>"
+      },
       "./bundle.css"
     ],
     "js": [
@@ -72,6 +75,9 @@
       },
       {
         "contents": "if(document.getElementById('mocha')){mocha.checkLeaks();mocha.run();}"
+      },
+      {
+        "contents": "</script><!-- lol html injection -->    <script type=\"text/javascript\"> (function() { var path = '//easy.myfonts.net/v2/js?sid=207020(font-family=FF+Milo+Serif+Pro)&sid=207025(font-family=FF+Milo+Serif+Pro+Med+Italic)&sid=207029(font-family=FF+Milo+Serif+Pro+Bold)&key=ADKczqjSur', protocol = ('https:' == document.location.protocol ? 'https:' : 'http:'), trial = document.createElement('script'); trial.type = 'text/javascript'; trial.async = true; trial.src = protocol + path; var head = document.getElementsByTagName(\"head\")[0]; head.appendChild(trial); })(); </script> <script type=\"text/javascript\"> (function() { var path = '//easy.myfonts.net/v2/js?sid=274518(font-family=Halifax+Regular)&sid=274519(font-family=Halifax+Light)&sid=274524(font-family=Halifax+Bold)&key=LUwLgIpMrH', protocol = ('https:' == document.location.protocol ? 'https:' : 'http:'), trial = document.createElement('script'); trial.type = 'text/javascript'; trial.async = true; trial.src = protocol + path; var head = document.getElementsByTagName(\"head\")[0]; head.appendChild(trial); })(); </script>     <script>/* end my html injection */"
       }
     ],
     "sections": [

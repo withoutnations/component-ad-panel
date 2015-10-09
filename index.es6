@@ -6,25 +6,29 @@ export default class AnimatedPanel extends React.Component {
 
   static get propTypes() {
     return {
+      animated: React.PropTypes.bool,
       adTag: React.PropTypes.string,
       lazyLoad: React.PropTypes.bool,
       lazyLoadMargin: React.PropTypes.number,
       sizes: React.PropTypes.arrayOf(React.PropTypes.array),
       reserveHeight: React.PropTypes.number,
+      styled: React.PropTypes.bool,
     };
   }
 
   static get defaultProps() {
     return {
+      animated: true,
       lazyLoad: true,
       lazyLoadMargin: 350,
-      sizes: [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ]
+      sizes: [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ],
+      styled: true,
     }
   }
 
   constructor(...args) {
     super(...args);
-    this.showElementWhenInView = this.showElementWhenInView.bind(this);
+    this.loadElementWhenInView = this.loadElementWhenInView.bind(this);
   }
 
   componentWillMount() {
@@ -51,9 +55,9 @@ export default class AnimatedPanel extends React.Component {
     if (!this.props.lazyLoad && this.state && this.state.tagId && !this.state.adGenerated) {
       this.generateAd();
     }
-    window.addEventListener('scroll', this.showElementWhenInView);
-    window.addEventListener('resize', this.showElementWhenInView);
-    this.showElementWhenInView();
+    window.addEventListener('scroll', this.loadElementWhenInView);
+    window.addEventListener('resize', this.loadElementWhenInView);
+    this.loadElementWhenInView();
   }
 
   componentWillUnmount() {
@@ -68,7 +72,7 @@ export default class AnimatedPanel extends React.Component {
       rect.top < (window.innerHeight || document.documentElement.clientHeight) + margin;
   }
 
-  showElementWhenInView() {
+  loadElementWhenInView() {
     const containerElement = this.refs.container;
     if (!this.state.adGenerated &&
         this.props.lazyLoad &&
@@ -77,16 +81,14 @@ export default class AnimatedPanel extends React.Component {
     }
     if (this.isElementInViewport(containerElement) === true) {
       const targetContainerElement = React.findDOMNode(containerElement);
-      targetContainerElement.style.opacity = 1;
-      targetContainerElement.style.transform = 'translateY(0px)';
-      targetContainerElement.style.webkitTransform = 'translateY(0px)';
+      targetContainerElement.className += ' animatedpanel--visible';
       this.cleanupEventListeners();
     }
   }
 
   cleanupEventListeners() {
-    window.removeEventListener('scroll', this.showElementWhenInView);
-    window.removeEventListener('resize', this.showElementWhenInView);
+    window.removeEventListener('scroll', this.loadElementWhenInView);
+    window.removeEventListener('resize', this.loadElementWhenInView);
   }
 
   generateAd() {
@@ -123,16 +125,28 @@ export default class AnimatedPanel extends React.Component {
   render() {
     let tag;
     if (this.state && this.state.tagId) {
-      tag = (<div id={this.state.tagId} style={{ minHeight: this.props.reserveHeight || undefined }}></div>);
+      const adStyle = {
+        minHeight: this.props.reserveHeight || undefined
+      };
+      tag = (<div className="animatedpanel__googlead" id={this.state.tagId} style={adStyle}></div>);
     }
+    let rootClassNames = ['animatedpanel__container'];
+    let title;
+    if (this.props.styled) {
+      rootClassNames.push('animatedpanel__container--styled');
+      title = (<span ref="title" className="animatedpanel__title">Advertisement</span>)
+    }
+    if (this.props.animated) {
+      rootClassNames.push('animatedpanel__animated');
+    }
+    const aria = {
+      role: 'complementary',
+      itemscope: 'https://schema.org/WPAdBlock',
+    };
     return (
-      <div ref="container" className="AnimatedPanel--container">
-        <span ref="title" className="AnimatedPanel--title">Advertisement</span>
-        <div ref="panel" className="AnimatedPanel--panel">
-          <div ref="panelInner" className="AnimatedPanel--panel-inner">
-          {tag}
-          </div>
-        </div>
+      <div ref="container" className={rootClassNames.join(' ')} {...aria}>
+        {title}
+        {tag}
       </div>
     );
   }
