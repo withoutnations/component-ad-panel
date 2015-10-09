@@ -139,8 +139,12 @@ export default class AnimatedPanel extends React.Component {
     if (this.props.animated) {
       rootClassNames.push('animatedpanel__animated');
     }
+    const aria = {
+      role: 'complementary',
+      itemscope: 'https://schema.org/WPAdBlock',
+    };
     return (
-      <div ref="container" className={rootClassNames.join(' ')}>
+      <div ref="container" className={rootClassNames.join(' ')} {...aria}>
         {title}
         {tag}
       </div>
