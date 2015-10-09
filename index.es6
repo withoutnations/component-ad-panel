@@ -128,13 +128,13 @@ export default class AnimatedPanel extends React.Component {
       const adStyle = {
         minHeight: this.props.reserveHeight || undefined
       };
-      tag = (<div className="animatedpanel--googlead" id={this.state.tagId} style={adStyle}></div>);
+      tag = (<div className="animatedpanel__googlead" id={this.state.tagId} style={adStyle}></div>);
     }
-    let rootClassNames = ['animatedpanel--container'];
+    let rootClassNames = ['animatedpanel__container'];
     let title;
     if (this.props.styled) {
-      rootClassNames.push('animatedpanel--container__styled');
-      title = (<span ref="title" className="animatedpanel--title">Advertisement</span>)
+      rootClassNames.push('animatedpanel__container--styled');
+      title = (<span ref="title" className="animatedpanel__title">Advertisement</span>)
     }
     if (this.props.animated) {
       rootClassNames.push('animatedpanel__animated');
