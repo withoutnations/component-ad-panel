@@ -5,47 +5,47 @@
   --ad-left-strip-width: 5px;
 }
 
-.animatedpanel__container {
+.ad-panel__container {
   font-size: 1rem;
   position: relative;
   display: inline-block;
 }
 
-.animatedpanel__container--styled .animatedpanel__title,
-.animatedpanel__container--styled .animatedpanel__googlead {
+.ad-panel__container--styled .ad-panel__title,
+.ad-panel__container--styled .ad-panel__googlead {
   background-color: var(--color-berlin);
 }
 
-.animatedpanel__container--styled .animatedpanel__googlead {
+.ad-panel__container--styled .ad-panel__googlead {
   padding-left: var(--ad-left-strip-width);
 }
-.animatedpanel__container--styled .animatedpanel__title {
+.ad-panel__container--styled .ad-panel__title {
   padding: var(--ad-left-strip-width);
   border-top-right-radius: calc(var(--ad-left-strip-width) / 2);
   border-top-left-radius: calc(var(--ad-left-strip-width) / 2);
 }
 
-.animatedpanel__container--styled .animatedpanel__title {
+.ad-panel__container--styled .ad-panel__title {
   color: var(--color-london);
   font-family: var(--fontfamily-display);
   font-size: var(--text-size-step--1);
   line-height: var(--text-line-height-display-on-step--1);
 }
 
-.animatedpanel__container iframe,
-.animatedpanel__container img{
+.ad-panel__container iframe,
+.ad-panel__container img{
   margin: 0 auto;
   display: block;
 }
 
-.animatedpanel__animated {
+.ad-panel__animated {
   transform: translateY(100px);
   transition: all 0.4s ease-out 0.5s;
   transition-property: opacity, transform;
   opacity: 0;
 }
 
-.animatedpanel__animated.animatedpanel--visible {
+.ad-panel__animated.ad-panel--visible {
   transform: translateY(0px);
   opacity: 1;
 }

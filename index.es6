@@ -2,7 +2,7 @@ import React from 'react';
 
 /* global window: false */
 /* global document: false */
-export default class AnimatedPanel extends React.Component {
+export default class AdPanel extends React.Component {
 
   static get propTypes() {
     return {
@@ -81,7 +81,7 @@ export default class AnimatedPanel extends React.Component {
     }
     if (this.isElementInViewport(containerElement) === true) {
       const targetContainerElement = React.findDOMNode(containerElement);
-      targetContainerElement.className += ' animatedpanel--visible';
+      targetContainerElement.className += ' ad-panel--visible';
       this.cleanupEventListeners();
     }
   }
@@ -128,16 +128,16 @@ export default class AnimatedPanel extends React.Component {
       const adStyle = {
         minHeight: this.props.reserveHeight || undefined
       };
-      tag = (<div className="animatedpanel__googlead" id={this.state.tagId} style={adStyle}></div>);
+      tag = (<div className="ad-panel__googlead" id={this.state.tagId} style={adStyle}></div>);
     }
-    let rootClassNames = ['animatedpanel__container'];
+    let rootClassNames = ['ad-panel__container'];
     let title;
     if (this.props.styled) {
-      rootClassNames.push('animatedpanel__container--styled');
-      title = (<span ref="title" className="animatedpanel__title">Advertisement</span>)
+      rootClassNames.push('ad-panel__container--styled');
+      title = (<span ref="title" className="ad-panel__title">Advertisement</span>)
     }
     if (this.props.animated) {
-      rootClassNames.push('animatedpanel__animated');
+      rootClassNames.push('ad-panel__animated');
     }
     const aria = {
       role: 'complementary',
