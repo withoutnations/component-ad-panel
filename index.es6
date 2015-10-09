@@ -81,7 +81,7 @@ export default class AnimatedPanel extends React.Component {
     }
     if (this.isElementInViewport(containerElement) === true) {
       const targetContainerElement = React.findDOMNode(containerElement);
-      targetContainerElement.className += ' animatedpanel__visible';
+      targetContainerElement.className += ' animatedpanel--visible';
       this.cleanupEventListeners();
     }
   }
