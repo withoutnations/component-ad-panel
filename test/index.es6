@@ -1,27 +1,27 @@
-import AnimatedPanel from '..';
+import AdPanel from '..';
 import React from 'react';
 
-describe('AnimatedPanel', () => {
+describe('AdPanel', () => {
 
   it('should exist', () => {
-    AnimatedPanel.should.be.a('function');
+    AdPanel.should.be.a('function');
   });
 
   it('renders a component', () => {
-    (<AnimatedPanel/>).should.be.an('object');
+    (<AdPanel/>).should.be.an('object');
   });
 
   it('is a react component', () => {
-    (new AnimatedPanel()).should.be.an.instanceOf(React.Component);
+    (new AdPanel()).should.be.an.instanceOf(React.Component);
   });
 
   describe('componentDidMount', () => {
 
     it('calls generateAd', () => {
       // console.log(chai.spy);
-      chai.spy.on(AnimatedPanel.prototype, 'generateAd');
+      chai.spy.on(AdPanel.prototype, 'generateAd');
 
-      const element = React.createElement(AnimatedPanel);
+      const element = React.createElement(AdPanel);
       element.type.prototype.componentDidMount.call(element);
 
       element.type.prototype.generateAd
@@ -31,7 +31,7 @@ describe('AnimatedPanel', () => {
     it('adds loadElementWhenInView() to scroll event listener', () => {
       chai.spy.on(Object.getPrototypeOf(window), 'addEventListener');
 
-      const element = React.createElement(AnimatedPanel);
+      const element = React.createElement(AdPanel);
       element.componentDidMount();
 
       window.addEventListener
@@ -41,7 +41,7 @@ describe('AnimatedPanel', () => {
     it('adds loadElementWhenInView() to resize event listener', () => {
       chai.spy.on(Object.getPrototypeOf(window), 'addEventListener');
 
-      const element = React.createElement(AnimatedPanel);
+      const element = React.createElement(AdPanel);
       element.componentDidMount();
 
       window.addEventListener
@@ -49,7 +49,7 @@ describe('AnimatedPanel', () => {
     });
 
     it('calls loadElementWhenInView', () => {
-      const element = React.createElement(AnimatedPanel);
+      const element = React.createElement(AdPanel);
       chai.spy.on(element, 'loadElementWhenInView');
       element.componentDidMount();
 
@@ -64,7 +64,7 @@ describe('AnimatedPanel', () => {
     it('removes loadElementWhenInView() to scroll event listener', () => {
       chai.spy.on(Object.getPrototypeOf(window), 'removeEventListener');
 
-      const element = React.createElement(AnimatedPanel);
+      const element = React.createElement(AdPanel);
       element.cleanupEventListeners();
 
       window.removeEventListener
@@ -74,7 +74,7 @@ describe('AnimatedPanel', () => {
     it('removes loadElementWhenInView() to resize event listener', () => {
       chai.spy.on(Object.getPrototypeOf(window), 'removeEventListener');
 
-      const element = React.createElement(AnimatedPanel);
+      const element = React.createElement(AdPanel);
       element.cleanupEventListeners();
 
       window.removeEventListener
@@ -86,9 +86,9 @@ describe('AnimatedPanel', () => {
   describe('componentWillUnmount', () => {
 
     it('call cleanupEventListeners', () => {
-      chai.spy.on(AnimatedPanel.prototype, 'cleanupEventListeners');
+      chai.spy.on(AdPanel.prototype, 'cleanupEventListeners');
 
-      const element = new AnimatedPanel({});
+      const element = new AdPanel({});
       element.componentWillUnmount();
 
       element.cleanupEventListeners

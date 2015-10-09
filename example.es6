@@ -1,5 +1,5 @@
 import React from 'react';
-import AnimatedPanel from './index.es6';
+import AdPanel from './index.es6';
 // ((run) => {
 //   if (!run) {
 //     return;
@@ -105,7 +105,7 @@ export default (
       <p>No cum omnis epicurei, an elitr ludus qualisque cum. Ludus alienum iudicabit id qui. Convenire incorrupte
        reprehendunt id eum. Solum clita quo id. Nisl sale inimicus ea sea, per quem timeam tamquam ad. blah</p>
       </div>
-      <AnimatedPanel adTag="/5605/teg.fmsq/wdif/busi" sizes={[[300, 250]]} reserveHeight={250} />
+      <AdPanel adTag="/5605/teg.fmsq/wdif/busi" sizes={[[300, 250]]} reserveHeight={250} />
       <div>
       <p>Lorem ipsum dolor sit amet, sit quod odio intellegebat no. Causae labitur sadipscing ne eos, vis tota eirmod
        debitis ex. Sit ubique nominavi erroribus in, stet lorem tation ea pri. Ut movet gubergren est, quo euismod

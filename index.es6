@@ -2,7 +2,7 @@ import React from 'react';
 
 /* global window: false */
 /* global document: false */
-export default class AnimatedPanel extends React.Component {
+export default class AdPanel extends React.Component {
 
   static get propTypes() {
     return {

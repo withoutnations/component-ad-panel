@@ -1,16 +1,16 @@
 {
-  "name": "@economist/ad-panel",
+  "name": "@economist/component-ad-panel",
   "version": "1.0.0",
   "description": "An advert panel using GPT tags",
   "author": "The Economist (http://economist.com)",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/the-economist-editorial/component-animatedpanel.git"
+    "url": "git+https://github.com/the-economist-editorial/component-ad-panel.git"
   },
-  "homepage": "https://github.com/the-economist-editorial/component-animatedpanel#readme",
+  "homepage": "https://github.com/the-economist-editorial/component-ad-panel#readme",
   "bugs": {
-    "url": "https://github.com/the-economist-editorial/component-animatedpanel/issues"
+    "url": "https://github.com/the-economist-editorial/component-ad-panel/issues"
   },
   "main": "index.js",
   "files": [
