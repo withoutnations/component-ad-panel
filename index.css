@@ -27,9 +27,9 @@
 
 .ad-panel__container--styled .ad-panel__title {
   color: var(--color-london);
-  font-family: var(--fontfamily-display);
+  font-family: var(--fontfamily-body);
   font-size: var(--text-size-step--1);
-  line-height: var(--text-line-height-display-on-step--1);
+  line-height: var(--text-line-height-body-on-step--1);
 }
 
 .ad-panel__container iframe,
