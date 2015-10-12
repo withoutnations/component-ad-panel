@@ -1,5 +1,5 @@
 import React from 'react';
-import AdPanel from './index.es6';
+import AdPanel from './index';
 // ((run) => {
 //   if (!run) {
 //     return;
