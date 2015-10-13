@@ -132,9 +132,11 @@
     "watch": "parallelshell 'npm run doc:watch' 'npm run prepublish:watch' 'npm run serve'"
   },
   "dependencies": {
-    "@economist/component-devpack": "^3.4.3"
+    "@economist/component-palette": "^1.2.1",
+    "@economist/component-typography": "^1.4.3"
   },
   "devDependencies": {
+    "@economist/component-devpack": "^3.4.3",
     "babel": "^5.8.23",
     "babelify": "^6.3.0",
     "browserify": "^11.0.1",
@@ -155,11 +157,11 @@
     "npm-watch": "0.0.1",
     "parallelshell": "^2.0.0",
     "pre-commit": "^1.0.10",
-    "react": "^0.14.0-rc1",
+    "react": "^0.14.0||^0.14.0-rc",
     "watchify": "^3.4.0"
   },
   "peerDependencies": {
-    "react": "^0.14.0-rc1"
+    "react": "^0.14.0||^0.14.0-rc"
   },
   "pre-commit": [
     "lint"
