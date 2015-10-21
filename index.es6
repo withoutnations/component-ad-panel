@@ -75,7 +75,6 @@ export default class AdPanel extends React.Component {
   loadElementWhenInView() {
     const containerElement = this.refs.container;
     if (!this.state.adGenerated &&
-        this.props.lazyLoad &&
         this.isElementInViewport(containerElement, this.props.lazyLoadMargin)) {
       this.generateAd();
     }
