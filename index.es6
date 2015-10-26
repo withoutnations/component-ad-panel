@@ -142,7 +142,7 @@ export default class AdPanel extends React.Component {
     }
     const aria = {
       role: 'complementary',
-      itemscope: 'https://schema.org/WPAdBlock',
+      itemScope: 'https://schema.org/WPAdBlock',
     };
     return (
       <div ref="container" className={rootClassNames.join(' ')} {...aria}>
