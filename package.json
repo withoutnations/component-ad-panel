@@ -1,6 +1,6 @@
 {
   "name": "@economist/component-ad-panel",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An advert panel using GPT tags",
   "author": "The Economist (http://economist.com)",
   "license": "ISC",
