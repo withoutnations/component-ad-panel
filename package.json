@@ -1,6 +1,6 @@
 {
   "name": "@economist/component-ad-panel",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An advert panel using GPT tags",
   "author": "The Economist (http://economist.com)",
   "license": "ISC",
@@ -133,7 +133,8 @@
   },
   "dependencies": {
     "@economist/component-palette": "^1.2.1",
-    "@economist/component-typography": "^1.4.3"
+    "@economist/component-typography": "^1.4.3",
+    "react-dom": "^0.14.0"
   },
   "devDependencies": {
     "@economist/component-devpack": "^3.4.3",

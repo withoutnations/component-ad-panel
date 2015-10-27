@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 /* global window: false */
 /* global document: false */
@@ -65,7 +66,7 @@ export default class AdPanel extends React.Component {
   }
 
   isElementInViewport(elm, margin = 0) {
-    const rect = React.findDOMNode(elm).getBoundingClientRect();
+    const rect = ReactDOM.findDOMNode(elm).getBoundingClientRect();
     return rect.bottom > -margin &&
       rect.right > -margin &&
       rect.left < (window.innerWidth || document.documentElement.clientWidth) + margin &&
@@ -79,7 +80,7 @@ export default class AdPanel extends React.Component {
       this.generateAd();
     }
     if (this.isElementInViewport(containerElement) === true) {
-      const targetContainerElement = React.findDOMNode(containerElement);
+      const targetContainerElement = ReactDOM.findDOMNode(containerElement);
       targetContainerElement.className += ' ad-panel--visible';
       this.cleanupEventListeners();
     }
@@ -113,7 +114,7 @@ export default class AdPanel extends React.Component {
         googleTag.display(this.state.tagId);
       });
     } else {
-      const adToHide = React.findDOMNode(this.refs.container);
+      const adToHide = ReactDOM.findDOMNode(this.refs.container);
       adToHide.style.display = 'none';
       /* eslint-disable no-console */
       if (typeof console !== 'undefined' && console.error) {
