@@ -13,6 +13,11 @@ export default class AdPanel extends React.Component {
       lazyLoadMargin: React.PropTypes.number,
       sizes: React.PropTypes.arrayOf(React.PropTypes.array),
       sizeMapping: React.PropTypes.arrayOf(React.PropTypes.array),
+      targeting: React.PropTypes.arrayOf(
+        React.PropTypes.arrayOf(
+          React.PropTypes.string
+        )
+      ),
       reserveHeight: React.PropTypes.number,
       styled: React.PropTypes.bool,
     };
@@ -28,6 +33,7 @@ export default class AdPanel extends React.Component {
         [[980, 200], [[1024, 768]]],
         [[0, 0], [[300, 250]]],
       ],
+      targeting: [],
       styled: true,
     };
   }
@@ -110,13 +116,16 @@ export default class AdPanel extends React.Component {
       const googleTag = window.googletag;
       googleTag.cmd.push(() => {
         const sizeMapping = this.buildSizeMapping();
-        const slot = googleTag.defineSlot(
+        let slot = googleTag.defineSlot(
           this.props.adTag,
           this.props.sizes,
           this.state.tagId)
-          .setTargeting('resp_mpu_inline_ad', 'refresh')
           .addService(googleTag.pubads())
           .defineSizeMapping(sizeMapping);
+
+        for (const [ key, value ] of this.props.targeting) {
+          slot.setTargeting(key, value)
+        }
         googleTag.pubads().enableSingleRequest();
         googleTag.enableServices();
         googleTag.display(this.state.tagId);
