@@ -12,6 +12,7 @@ export default class AdPanel extends React.Component {
       lazyLoad: React.PropTypes.bool,
       lazyLoadMargin: React.PropTypes.number,
       sizes: React.PropTypes.arrayOf(React.PropTypes.array),
+      sizeMapping: React.PropTypes.arrayOf(React.PropTypes.array),
       reserveHeight: React.PropTypes.number,
       styled: React.PropTypes.bool,
     };
@@ -23,6 +24,10 @@ export default class AdPanel extends React.Component {
       lazyLoad: true,
       lazyLoadMargin: 350,
       sizes: [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ],
+      sizeMapping: [
+        [[980, 200], [[1024, 768]]],
+        [[0, 0], [[300, 250]]],
+      ],
       styled: true,
     };
   }
@@ -91,24 +96,27 @@ export default class AdPanel extends React.Component {
     window.removeEventListener('resize', this.loadElementWhenInView);
   }
 
+  buildSizeMapping() {
+    let mapping = this.props.sizeMapping || [];
+    const sizeMappingBuilder = window.googletag.sizeMapping();
+    return mapping.reduce((builder, [viewportSize, adSizes]) => {
+      return builder.addSize(viewportSize, adSizes)
+    }, sizeMappingBuilder).build();
+  }
+
   generateAd() {
     this.setState({ adGenerated: true });
     if ((window.googletag) && (this.props.adTag)) {
       const googleTag = window.googletag;
       googleTag.cmd.push(() => {
-        const mappingAd = window.googletag.sizeMapping()
-          .addSize([ 980, 200 ], [ 1024, 768 ])
-          .addSize([ 0, 0 ], [ 300, 250 ])
-          .build();
+        const sizeMapping = this.buildSizeMapping();
         const slot = googleTag.defineSlot(
           this.props.adTag,
           this.props.sizes,
           this.state.tagId)
           .setTargeting('resp_mpu_inline_ad', 'refresh')
-          .addService(googleTag.pubads());
-        if (this.props.sizes && this.props.sizes.length > 1) {
-          slot.defineSizeMapping(mappingAd);
-        }
+          .addService(googleTag.pubads())
+          .defineSizeMapping(sizeMapping);
         googleTag.pubads().enableSingleRequest();
         googleTag.enableServices();
         googleTag.display(this.state.tagId);
