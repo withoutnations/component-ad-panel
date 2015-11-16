@@ -20,6 +20,7 @@ export default class AdPanel extends React.Component {
       ),
       reserveHeight: React.PropTypes.number,
       styled: React.PropTypes.bool,
+      googletag: React.PropTypes.object,  // Testing hook
     };
   }
 
@@ -52,17 +53,7 @@ export default class AdPanel extends React.Component {
 
   componentDidMount() {
     if (this.state && this.state.tagId) {
-      /* global window document */
-      if (typeof window !== 'undefined' && window.document &&
-          !window.googletag) {
-        window.googletag = { cmd: [] };
-        const gads = document.createElement('script');
-        gads.async = true;
-        gads.type = 'text/javascript';
-        const useSsl = window.location.protocol === 'https:';
-        gads.src = `${useSsl ? 'https:' : 'http:'}//www.googletagservices.com/tag/js/gpt.js`;
-        document.head.appendChild(gads);
-      }
+      this.getOrCreateGoogleTag();
     }
     if (!this.props.lazyLoad && this.state && this.state.tagId && !this.state.adGenerated) {
       this.generateAd();
@@ -74,6 +65,25 @@ export default class AdPanel extends React.Component {
 
   componentWillUnmount() {
     this.cleanupEventListeners();
+  }
+
+  getOrCreateGoogleTag() {
+    /* global window document */
+    if (this.props.googletag) {
+      return this.props.googletag;
+    } else if (typeof window !== 'undefined' && window.document &&
+        !window.googletag) {
+      window.googletag = { cmd: [] };
+      const gads = document.createElement('script');
+      gads.async = true;
+      gads.type = 'text/javascript';
+      const useSsl = window.location.protocol === 'https:';
+      gads.src = `${useSsl ? 'https:' : 'http:'}//www.googletagservices.com/tag/js/gpt.js`;
+      document.head.appendChild(gads);
+      return window.googletag;
+    } else if (typeof window !== 'undefined' && window.googletag) {
+      return window.googletag;
+    }
   }
 
   isElementInViewport(elm, margin = 0) {
@@ -104,7 +114,7 @@ export default class AdPanel extends React.Component {
 
   buildSizeMapping() {
     let mapping = this.props.sizeMapping || [];
-    const sizeMappingBuilder = window.googletag.sizeMapping();
+    const sizeMappingBuilder = this.getOrCreateGoogleTag().sizeMapping();
     return mapping.reduce((builder, [viewportSize, adSizes]) => {
       return builder.addSize(viewportSize, adSizes)
     }, sizeMappingBuilder).build();
@@ -112,8 +122,8 @@ export default class AdPanel extends React.Component {
 
   generateAd() {
     this.setState({ adGenerated: true });
-    if ((window.googletag) && (this.props.adTag)) {
-      const googleTag = window.googletag;
+    const googleTag = this.getOrCreateGoogleTag();
+    if (this.props.adTag) {
       googleTag.cmd.push(() => {
         const sizeMapping = this.buildSizeMapping();
         let slot = googleTag.defineSlot(
@@ -133,10 +143,6 @@ export default class AdPanel extends React.Component {
     } else {
       const adToHide = ReactDOM.findDOMNode(this.refs.container);
       adToHide.style.display = 'none';
-      /* eslint-disable no-console */
-      if (typeof console !== 'undefined' && console.error) {
-        console.error('window.googletag not present, please put googletag js into html');
-      }
     }
   }
 
