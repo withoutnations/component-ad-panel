@@ -118,7 +118,11 @@ export default class AdPanel extends React.Component {
 
   buildSizeMapping() {
     let mapping = this.props.sizeMapping || [];
-    const sizeMappingBuilder = this.getOrCreateGoogleTag().sizeMapping();
+    const googleTag = this.getOrCreateGoogleTag();
+    if (!googleTag.sizeMapping) {
+      throw new Error('buildSizeMapping() must be called inside a googletag.cmd.push()\'ed function!');
+    }
+    const sizeMappingBuilder = googleTag.sizeMapping();
     return mapping.reduce((builder, [viewportSize, adSizes]) => {
       return builder.addSize(viewportSize, adSizes)
     }, sizeMappingBuilder).build();
@@ -141,6 +145,7 @@ export default class AdPanel extends React.Component {
           slot.setTargeting(key, value)
         }
         googleTag.pubads().enableSingleRequest();
+        googleTag.pubads().collapseEmptyDivs();
         googleTag.enableServices();
         googleTag.display(this.state.tagId);
       });
