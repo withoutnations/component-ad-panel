@@ -188,15 +188,11 @@ describe('AdPanel', () => {
   });
 
   describe('loadElementWhenInView', () => {
-    const originalFindDomNode = React.findDOMNode;
     beforeEach(() => {
       instance.isElementInViewport = chai.spy('isElementInViewport');
       instance.generateAd = chai.spy('generateAd');
       instance.cleanupEventListeners = chai.spy('cleanupEventListeners');
-      React.findDOMNode = chai.spy('findDOMNode');
-    });
-    afterEach(() => {
-      React.findDOMNode = originalFindDomNode;
+      instance.getContainerDOMElement = chai.spy(() => ({ className: '' }));
     });
     it('calls isElementInViewport', () => {
       instance.refs.container = { fake: 'element' };
@@ -211,7 +207,7 @@ describe('AdPanel', () => {
         instance.loadElementWhenInView();
         instance.generateAd.should.not.have.been.called();
         instance.cleanupEventListeners.should.not.have.been.called();
-        React.findDOMNode.should.not.have.been.called();
+        instance.getContainerDOMElement.should.not.have.been.called();
       });
     });
     describe('When the component is near the view, but not inside', () => {
@@ -245,7 +241,7 @@ describe('AdPanel', () => {
       let fakeElement = null;
       beforeEach(() => {
         instance.isElementInViewport = () => true;
-        React.findDOMNode = chai.spy(() => fakeElement);
+        instance.getContainerDOMElement = chai.spy(() => fakeElement);
         fakeElement = { className: '' };
       });
       it('Calls generateAd() and cleanupEventListeners()', () => {
@@ -255,7 +251,7 @@ describe('AdPanel', () => {
       });
       it('Adds the ad-panel--visible class to the container element', () => {
         instance.loadElementWhenInView();
-        React.findDOMNode.should.have.been.called();
+        instance.getContainerDOMElement.should.have.been.called();
         fakeElement.className.should.equal(' ad-panel--visible');
       });
     });

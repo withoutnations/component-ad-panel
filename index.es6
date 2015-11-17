@@ -94,6 +94,10 @@ export default class AdPanel extends React.Component {
       rect.top < (window.innerHeight || document.documentElement.clientHeight) + margin;
   }
 
+  getContainerDOMElement() {
+    return ReactDOM.findDOMNode(this.refs.container);
+  }
+
   loadElementWhenInView() {
     const containerElement = this.refs.container;
     if (!this.state.adGenerated &&
@@ -101,7 +105,7 @@ export default class AdPanel extends React.Component {
       this.generateAd();
     }
     if (this.isElementInViewport(containerElement) === true) {
-      const targetContainerElement = ReactDOM.findDOMNode(containerElement);
+      const targetContainerElement = this.getContainerDOMElement();
       targetContainerElement.className += ' ad-panel--visible';
       this.cleanupEventListeners();
     }
