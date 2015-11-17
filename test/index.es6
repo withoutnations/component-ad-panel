@@ -8,7 +8,7 @@ const removeEventListener = window.removeEventListener;
 describe('AdPanel', () => {
   let instance = null;
   beforeEach(() => {
-    instance = new AdPanel({});
+    instance = new AdPanel({ adTag: 'test-ad-tag' });
     instance.refs = {};
     instance.state = {};
     instance.generateAd = chai.spy('generateAd');
@@ -25,11 +25,11 @@ describe('AdPanel', () => {
     });
 
     it('renders a component', () => {
-      (<AdPanel/>).should.be.an('object');
+      (<AdPanel adTag="fake-tag" />).should.be.an('object');
     });
 
     it('is a react component', () => {
-      (new AdPanel()).should.be.an.instanceOf(React.Component);
+      (new AdPanel({ adTag: 'fake-tag' })).should.be.an.instanceOf(React.Component);
     });
   });
 
@@ -82,7 +82,6 @@ describe('AdPanel', () => {
       // These tests actually want to call generateAd
       instance.generateAd = chai.spy(AdPanel.prototype.generateAd);
       instance.setState = chai.spy();
-      instance.props.adTag = 'test-ad-tag';
       fakeMapping = Symbol('fakemapping');
       sizeMappingBuilder = {
         addSize() {

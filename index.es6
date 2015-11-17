@@ -8,7 +8,7 @@ export default class AdPanel extends React.Component {
   static get propTypes() {
     return {
       animated: React.PropTypes.bool,
-      adTag: React.PropTypes.string,
+      adTag: React.PropTypes.string.isRequired,
       lazyLoad: React.PropTypes.bool,
       lazyLoadMargin: React.PropTypes.number,
       sizes: React.PropTypes.arrayOf(React.PropTypes.array),
@@ -87,7 +87,7 @@ export default class AdPanel extends React.Component {
   }
 
   isElementInViewport(elm, margin = 0) {
-    const rect = ReactDOM.findDOMNode(elm).getBoundingClientRect();
+    const rect = this.getContainerDOMElement().getBoundingClientRect();
     return rect.bottom > -margin &&
       rect.right > -margin &&
       rect.left < (window.innerWidth || document.documentElement.clientWidth) + margin &&
@@ -131,28 +131,23 @@ export default class AdPanel extends React.Component {
   generateAd() {
     this.setState({ adGenerated: true });
     const googleTag = this.getOrCreateGoogleTag();
-    if (this.props.adTag) {
-      googleTag.cmd.push(() => {
-        const sizeMapping = this.buildSizeMapping();
-        let slot = googleTag.defineSlot(
-          this.props.adTag,
-          this.props.sizes,
-          this.state.tagId)
-          .addService(googleTag.pubads())
-          .defineSizeMapping(sizeMapping);
+    googleTag.cmd.push(() => {
+      const sizeMapping = this.buildSizeMapping();
+      let slot = googleTag.defineSlot(
+        this.props.adTag,
+        this.props.sizes,
+        this.state.tagId)
+        .addService(googleTag.pubads())
+        .defineSizeMapping(sizeMapping);
 
-        for (const [ key, value ] of this.props.targeting) {
-          slot.setTargeting(key, value)
-        }
-        googleTag.pubads().enableSingleRequest();
-        googleTag.pubads().collapseEmptyDivs();
-        googleTag.enableServices();
-        googleTag.display(this.state.tagId);
-      });
-    } else {
-      const adToHide = ReactDOM.findDOMNode(this.refs.container);
-      adToHide.style.display = 'none';
-    }
+      for (const [ key, value ] of this.props.targeting) {
+        slot.setTargeting(key, value)
+      }
+      googleTag.pubads().enableSingleRequest();
+      googleTag.pubads().collapseEmptyDivs();
+      googleTag.enableServices();
+      googleTag.display(this.state.tagId);
+    });
   }
 
   render() {
