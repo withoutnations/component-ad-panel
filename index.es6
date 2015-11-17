@@ -193,13 +193,11 @@ export default class AdPanel extends React.Component {
       if (this.props.reserveHeight) {
         adStyle = { minHeight: this.props.reserveHeight };
       }
-      tag = (<div className="ad-panel__googlead" id={this.state.tagId} style={adStyle}></div>);
+      tag = (<div className="ad-panel__googlead" id={this.state.tagId} style={adStyle} title="Advertisement"></div>);
     }
     let rootClassNames = [ 'ad-panel__container' ];
-    let title = [];
     if (this.props.styled) {
       rootClassNames = rootClassNames.concat([ 'ad-panel__container--styled' ]);
-      title = (<span ref="title" className="ad-panel__title">Advertisement</span>);
     }
     if (this.props.animated) {
       rootClassNames = rootClassNames.concat([ 'ad-panel__animated' ]);
@@ -210,7 +208,6 @@ export default class AdPanel extends React.Component {
     };
     return (
       <div ref="container" className={rootClassNames.join(' ')} {...aria}>
-        {title}
         {tag}
       </div>
     );

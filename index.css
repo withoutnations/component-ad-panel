@@ -3,6 +3,7 @@
 
 :root {
   --ad-left-strip-width: 5px;
+  --ad-panel-title-size: 1.7em;
 }
 
 .ad-panel__container {
@@ -11,25 +12,29 @@
   display: inline-block;
 }
 
-.ad-panel__container--styled .ad-panel__title,
+.ad-panel__container--styled .ad-panel__googlead::before,
 .ad-panel__container--styled .ad-panel__googlead {
   background-color: var(--color-berlin);
 }
 
 .ad-panel__container--styled .ad-panel__googlead {
   padding-left: var(--ad-left-strip-width);
+  margin-top: var(--ad-panel-title-size);
 }
-.ad-panel__container--styled .ad-panel__title {
+.ad-panel__container--styled .ad-panel__googlead::before {
+  content: 'Advertisement';
+  content: attr(title);
   padding: var(--ad-left-strip-width);
   border-top-right-radius: calc(var(--ad-left-strip-width) / 2);
   border-top-left-radius: calc(var(--ad-left-strip-width) / 2);
-}
-
-.ad-panel__container--styled .ad-panel__title {
   color: var(--color-london);
   font-family: var(--fontfamily-body);
   font-size: var(--text-size-step--1);
   line-height: var(--text-line-height-body-on-step--1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
 }
 
 .ad-panel__container iframe,
