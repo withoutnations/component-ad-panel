@@ -73,6 +73,84 @@ describe('AdPanel', () => {
 
   });
 
+  describe('generateAd', () => {
+    let sizeMappingBuilder;
+    let adSlot;
+    let fakeMapping;
+    beforeEach(() => {
+      // These tests actually want to call generateAd
+      instance.generateAd = chai.spy(AdPanel.prototype.generateAd);
+      instance.setState = chai.spy();
+      instance.props.adTag = 'test-ad-tag';
+      fakeMapping = Symbol('fakemapping');
+      sizeMappingBuilder = {
+        addSize() {
+          return this;
+        },
+        build() {
+          return fakeMapping;
+        }
+      };
+      chai.spy.on(sizeMappingBuilder, 'addSize');
+      chai.spy.on(sizeMappingBuilder, 'build');
+      adSlot = {
+        addService() {
+          return this;
+        },
+        defineSizeMapping() {
+          return this;
+        },
+        setTargeting() {
+          return this;
+        }
+      };
+      chai.spy.on(adSlot, 'addService');
+      chai.spy.on(adSlot, 'defineSizeMapping');
+      chai.spy.on(adSlot, 'setTargeting');
+      instance.props.googletag = {
+        sizeMapping: () => sizeMappingBuilder,
+        defineSlot: () => adSlot,
+        pubads: () => ({ enableSingleRequest: () => null }),
+        enableServices: () => null,
+        display: () => null,
+        cmd: {
+          push(fn) {
+            fn();
+          },
+        },
+      };
+      chai.spy.on(instance.props.googletag, 'display');
+    });
+    it('uses the googletag API to add sizes and targeting options', () => {
+      instance.props.sizeMapping = [
+        [ [ 800, 600 ], [ [ 300, 250 ] ] ],
+        [ [ 640, 480 ], [  ] ]
+      ];
+      instance.props.targeting = [
+        [ 'foo', 'bar' ],
+        [ 'baz', 'qux' ],
+      ];
+      instance.generateAd();
+      instance.setState.should.have.been.called.with({ adGenerated: true });
+      sizeMappingBuilder.addSize.should.have.been.called.with(
+        instance.props.sizeMapping[0][0],
+        instance.props.sizeMapping[0][1]
+      );
+      sizeMappingBuilder.addSize.should.have.been.called.with(
+        instance.props.sizeMapping[1][0],
+        instance.props.sizeMapping[1][1]
+      );
+      sizeMappingBuilder.build.should.have.been.called();
+      adSlot.defineSizeMapping.should.have.been.called.with(fakeMapping);
+      adSlot.setTargeting.should.have.been.called.with(
+        'foo', 'bar'
+      );
+      adSlot.setTargeting.should.have.been.called.with(
+        'baz', 'qux'
+      );
+    });
+  });
+
   describe('cleanupEventListeners', () => {
     it('removes loadElementWhenInView() from the scroll event', () => {
       chai.spy.on(window, 'removeEventListener');
@@ -110,15 +188,11 @@ describe('AdPanel', () => {
   });
 
   describe('loadElementWhenInView', () => {
-    const originalFindDomNode = React.findDOMNode;
     beforeEach(() => {
       instance.isElementInViewport = chai.spy('isElementInViewport');
       instance.generateAd = chai.spy('generateAd');
       instance.cleanupEventListeners = chai.spy('cleanupEventListeners');
-      React.findDOMNode = chai.spy('findDOMNode');
-    });
-    afterEach(() => {
-      React.findDOMNode = originalFindDomNode;
+      instance.getContainerDOMElement = chai.spy(() => ({ className: '' }));
     });
     it('calls isElementInViewport', () => {
       instance.refs.container = { fake: 'element' };
@@ -133,7 +207,7 @@ describe('AdPanel', () => {
         instance.loadElementWhenInView();
         instance.generateAd.should.not.have.been.called();
         instance.cleanupEventListeners.should.not.have.been.called();
-        React.findDOMNode.should.not.have.been.called();
+        instance.getContainerDOMElement.should.not.have.been.called();
       });
     });
     describe('When the component is near the view, but not inside', () => {
@@ -167,7 +241,7 @@ describe('AdPanel', () => {
       let fakeElement = null;
       beforeEach(() => {
         instance.isElementInViewport = () => true;
-        React.findDOMNode = chai.spy(() => fakeElement);
+        instance.getContainerDOMElement = chai.spy(() => fakeElement);
         fakeElement = { className: '' };
       });
       it('Calls generateAd() and cleanupEventListeners()', () => {
@@ -177,7 +251,7 @@ describe('AdPanel', () => {
       });
       it('Adds the ad-panel--visible class to the container element', () => {
         instance.loadElementWhenInView();
-        React.findDOMNode.should.have.been.called();
+        instance.getContainerDOMElement.should.have.been.called();
         fakeElement.className.should.equal(' ad-panel--visible');
       });
     });
