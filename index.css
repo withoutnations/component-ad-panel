@@ -22,7 +22,6 @@
   margin-top: var(--ad-panel-title-size);
 }
 .ad-panel__container--styled .ad-panel__googlead::before {
-  content: 'Advertisement';
   content: attr(title);
   padding: var(--ad-left-strip-width);
   border-top-right-radius: calc(var(--ad-left-strip-width) / 2);
