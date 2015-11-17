@@ -77,6 +77,7 @@ describe('AdPanel', () => {
     let sizeMappingBuilder;
     let adSlot;
     let fakeMapping;
+    let fakePubAds;
     beforeEach(() => {
       // These tests actually want to call generateAd
       instance.generateAd = chai.spy(AdPanel.prototype.generateAd);
@@ -107,10 +108,16 @@ describe('AdPanel', () => {
       chai.spy.on(adSlot, 'addService');
       chai.spy.on(adSlot, 'defineSizeMapping');
       chai.spy.on(adSlot, 'setTargeting');
+      fakePubAds = {
+        enableSingleRequest: () => null,
+        collapseEmptyDivs: () => null
+      };
+      chai.spy.on(fakePubAds, 'enableSingleRequest');
+      chai.spy.on(fakePubAds, 'collapseEmptyDivs');
       instance.props.googletag = {
         sizeMapping: () => sizeMappingBuilder,
         defineSlot: () => adSlot,
-        pubads: () => ({ enableSingleRequest: () => null }),
+        pubads: () => fakePubAds,
         enableServices: () => null,
         display: () => null,
         cmd: {
@@ -148,6 +155,8 @@ describe('AdPanel', () => {
       adSlot.setTargeting.should.have.been.called.with(
         'baz', 'qux'
       );
+      fakePubAds.enableSingleRequest.should.have.been.called();
+      fakePubAds.collapseEmptyDivs.should.have.been.called();
     });
   });
 

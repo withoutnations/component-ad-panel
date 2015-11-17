@@ -145,6 +145,7 @@ export default class AdPanel extends React.Component {
           slot.setTargeting(key, value)
         }
         googleTag.pubads().enableSingleRequest();
+        googleTag.pubads().collapseEmptyDivs();
         googleTag.enableServices();
         googleTag.display(this.state.tagId);
       });
