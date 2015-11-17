@@ -33,6 +33,13 @@ describe('AdPanel', () => {
     });
   });
 
+  it('Renders empty div if state.adFailed is true', () => {
+    instance.state.adFailed = true;
+    const rendered = instance.render();
+    rendered.type.should.equal('div');
+    (typeof rendered.props.children).should.equal('undefined');
+  })
+
   describe('componentDidMount', () => {
     beforeEach(() => {
       // Remove actual loadElementWhenInView function
@@ -82,6 +89,14 @@ describe('AdPanel', () => {
       // These tests actually want to call generateAd
       instance.generateAd = chai.spy(AdPanel.prototype.generateAd);
       instance.setState = chai.spy();
+      instance.props.sizeMapping = [
+        [ [ 800, 600 ], [ [ 300, 250 ] ] ],
+        [ [ 640, 480 ], [  ] ]
+      ];
+      instance.props.targeting = [
+        [ 'foo', 'bar' ],
+        [ 'baz', 'qux' ],
+      ];
       fakeMapping = Symbol('fakemapping');
       sizeMappingBuilder = {
         addSize() {
@@ -109,10 +124,16 @@ describe('AdPanel', () => {
       chai.spy.on(adSlot, 'setTargeting');
       fakePubAds = {
         enableSingleRequest: () => null,
-        collapseEmptyDivs: () => null
+        collapseEmptyDivs: () => null,
+        _listeners: [],
+        addEventListener: (ev, listener) => {
+          fakePubAds._listeners.push([ev, listener])
+        },
       };
       chai.spy.on(fakePubAds, 'enableSingleRequest');
       chai.spy.on(fakePubAds, 'collapseEmptyDivs');
+      chai.spy.on(fakePubAds, 'addEventListener');
+      chai.spy.on(fakePubAds, 'removeEventListener');
       instance.props.googletag = {
         sizeMapping: () => sizeMappingBuilder,
         defineSlot: () => adSlot,
@@ -128,14 +149,6 @@ describe('AdPanel', () => {
       chai.spy.on(instance.props.googletag, 'display');
     });
     it('uses the googletag API to add sizes and targeting options', () => {
-      instance.props.sizeMapping = [
-        [ [ 800, 600 ], [ [ 300, 250 ] ] ],
-        [ [ 640, 480 ], [  ] ]
-      ];
-      instance.props.targeting = [
-        [ 'foo', 'bar' ],
-        [ 'baz', 'qux' ],
-      ];
       instance.generateAd();
       instance.setState.should.have.been.called.with({ adGenerated: true });
       sizeMappingBuilder.addSize.should.have.been.called.with(
@@ -156,6 +169,44 @@ describe('AdPanel', () => {
       );
       fakePubAds.enableSingleRequest.should.have.been.called();
       fakePubAds.collapseEmptyDivs.should.have.been.called();
+    });
+    describe('slotRenderEnded listener', () => {
+      beforeEach(() => {
+        instance.generateAd();
+        chai.spy.on(instance, 'unlistenSlotRenderEnded');
+        chai.spy.on(instance, 'cleanupEventListeners');
+      });
+      it('is attached', () => {
+        fakePubAds.addEventListener.should.have.been.called.with('slotRenderEnded');
+        fakePubAds._listeners.should.have.length(1)
+      });
+      it('calls setState({ adFailed: true }) and cleanupEventListeners if it receives an event from DFP telling it that there is no ad for the zone', () => {
+        fakePubAds._listeners[0][1]({ slot: instance.adSlot, isEmpty: true });
+        instance.setState.should.have.been.called.with({ adFailed: true });
+        instance.cleanupEventListeners.should.have.been.called();
+      });
+      it('only calls unlistenSlotRenderEnded if DFP tells it the ad is okay', () => {
+        fakePubAds._listeners[0][1]({ slot: instance.adSlot, isEmpty: false });
+        instance.setState.should.not.have.been.called.with({ adFailed: true });
+        instance.cleanupEventListeners.should.not.have.been.called();
+        instance.unlistenSlotRenderEnded.should.have.been.called();
+      });
+      it('does nothing if the slot is wrong', () => {
+        fakePubAds._listeners[0][1]({ slot: { wrong: 'slot' }, isEmpty: false });
+        instance.setState.should.not.have.been.called.with({ adFailed: true });
+        instance.cleanupEventListeners.should.not.have.been.called();
+        instance.unlistenSlotRenderEnded.should.not.have.been.called();
+      });
+      describe('unlistenSlotRenderEnded', () => {
+        beforeEach(() => {
+          instance.unlistenSlotRenderEnded();
+        });
+        it('disables the slotRenderEnded listener', ()=> {
+          fakePubAds._listeners[0][1]({ slot: instance.adSlot, isEmpty: false });
+          instance.setState.should.not.have.been.called.with({ adFailed: true });
+          instance.cleanupEventListeners.should.not.have.been.called();
+        });
+      });
     });
   });
 

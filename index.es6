@@ -42,12 +42,14 @@ export default class AdPanel extends React.Component {
   constructor(...args) {
     super(...args);
     this.loadElementWhenInView = this.loadElementWhenInView.bind(this);
+    this.unlistenSlotRenderEnded = () => null;
   }
 
   componentWillMount() {
     this.setState({
       tagId: `googlead-${(Math.random() * 1e17) .toString(16)}`,
       adGenerated: false,
+      adFailed: false,
     });
   }
 
@@ -114,6 +116,35 @@ export default class AdPanel extends React.Component {
   cleanupEventListeners() {
     window.removeEventListener('scroll', this.loadElementWhenInView);
     window.removeEventListener('resize', this.loadElementWhenInView);
+    this.unlistenSlotRenderEnded();
+  }
+
+  listenToSlotRenderEnded({ googleTag }) {
+    if (!googleTag.pubads) {
+      throw new Error('listenToSlotRenderEnded() must be called inside a googletag.cmd.push()\'ed function!');
+    }
+    if (!this.adSlot) {
+      throw new Error('listenToSlotRenderEnded() must be called with this.adSlot available!');
+    }
+
+    const slot = this.adSlot;
+    let unlistened = false;
+    const slotRenderEndedListener = (ev) => {
+      if (unlistened) { return; }  // the GPT API doesn't have a removeEventListener function
+      if (ev.slot !== slot) { return; }
+      if (ev.isEmpty) {
+        this.setState({ adFailed: true });
+        this.cleanupEventListeners();  // not interested in 'scroll' and 'resize' events any more
+        return;
+      }
+      this.unlistenSlotRenderEnded();
+    };
+
+    googleTag.pubads().addEventListener('slotRenderEnded', slotRenderEndedListener);
+
+    this.unlistenSlotRenderEnded = () => {
+      unlistened = true;
+    };
   }
 
   buildSizeMapping() {
@@ -133,7 +164,7 @@ export default class AdPanel extends React.Component {
     const googleTag = this.getOrCreateGoogleTag();
     googleTag.cmd.push(() => {
       const sizeMapping = this.buildSizeMapping();
-      let slot = googleTag.defineSlot(
+      let slot = this.adSlot = googleTag.defineSlot(
         this.props.adTag,
         this.props.sizes,
         this.state.tagId)
@@ -147,10 +178,15 @@ export default class AdPanel extends React.Component {
       googleTag.pubads().collapseEmptyDivs();
       googleTag.enableServices();
       googleTag.display(this.state.tagId);
+
+      this.listenToSlotRenderEnded({ googleTag });
     });
   }
 
   render() {
+    if (this.state && this.state.adFailed) {
+      return (<div />);
+    }
     let tag = [];
     if (this.state && this.state.tagId) {
       let adStyle = {};
