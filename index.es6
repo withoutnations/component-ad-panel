@@ -1,3 +1,4 @@
+import assert from 'assert';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -118,7 +119,10 @@ export default class AdPanel extends React.Component {
 
   buildSizeMapping() {
     let mapping = this.props.sizeMapping || [];
-    const sizeMappingBuilder = this.getOrCreateGoogleTag().sizeMapping();
+    const googleTag = this.getOrCreateGoogleTag();
+    assert(googleTag.sizeMapping,
+           'buildSizeMapping() must be called inside a googletag.cmd.push()\'ed function!');
+    const sizeMappingBuilder = googleTag.sizeMapping();
     return mapping.reduce((builder, [viewportSize, adSizes]) => {
       return builder.addSize(viewportSize, adSizes)
     }, sizeMappingBuilder).build();
