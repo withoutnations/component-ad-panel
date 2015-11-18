@@ -204,7 +204,7 @@ export default class AdPanel extends React.Component {
       rootClassNames = rootClassNames.concat([ 'ad-panel__animated' ]);
     }
     if (this.props.className) {
-      rootClassNames = rootClassNames.concat({ this.props.className })
+      rootClassNames = rootClassNames.concat([ this.props.className ])
     }
     const aria = {
       role: 'complementary',
