@@ -9,6 +9,7 @@ export default class AdPanel extends React.Component {
     return {
       animated: React.PropTypes.bool,
       adTag: React.PropTypes.string.isRequired,
+      className: React.PropTypes.string,
       lazyLoad: React.PropTypes.bool,
       lazyLoadMargin: React.PropTypes.number,
       sizes: React.PropTypes.arrayOf(React.PropTypes.array),
@@ -201,6 +202,9 @@ export default class AdPanel extends React.Component {
     }
     if (this.props.animated) {
       rootClassNames = rootClassNames.concat([ 'ad-panel__animated' ]);
+    }
+    if (this.props.className) {
+      rootClassNames = rootClassNames.concat({ this.props.className })
     }
     const aria = {
       role: 'complementary',
