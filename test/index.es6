@@ -97,7 +97,7 @@ describe('AdPanel', () => {
         [ 'foo', 'bar' ],
         [ 'baz', 'qux' ],
       ];
-      fakeMapping = Symbol('fakemapping');
+      fakeMapping = {};  // <- Just for reference equality. Not a symbol because it crashes on IE and Safari.
       sizeMappingBuilder = {
         addSize() {
           return this;
