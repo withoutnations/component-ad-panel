@@ -42,7 +42,7 @@ module.exports = function(config) {
     ],
     exclude: [],
     preprocessors: {},
-    reporters: ['progress'],
+    reporters: ['mocha'],
     port: 9876,
     colors: true,
     concurrency: 3,
