@@ -4,4 +4,3 @@ node_modules/
 bundle.css
 *.html
 !karma.conf.js
-

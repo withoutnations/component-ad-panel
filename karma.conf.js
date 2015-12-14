@@ -21,10 +21,6 @@ module.exports = function(config) {
       base: 'SauceLabs',
       browserName: 'MicrosoftEdge',
     },
-    SauceIphoneLatest: {
-      base: 'SauceLabs',
-      browserName: 'iPad',
-    },
     SauceAndroidLatest: {
       base: 'SauceLabs',
       browserName: 'Android',
@@ -61,6 +57,7 @@ module.exports = function(config) {
       browsers: Object.keys(sauceLabsBrowsers),
       sauceLabs: {
         testName: require('./package').name,
+        recordVideo: true,
         startConnect: true,
         username: process.env.SAUCE_USERNAME || 'economist',
         build: (function() {

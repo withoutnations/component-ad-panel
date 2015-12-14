@@ -14,6 +14,7 @@ docker pull "${DOCKER_IMAGE}"
 exec docker run \
     -v "${SSH_KEY}":/root/.ssh/id_rsa \
     -v "$(pwd)":/code \
+    -e NODE_ENV=${NODE_ENV:-test} \
     "${DOCKER_IMAGE}" \
     /bin/sh -cx "\
         trap 'chmod 777 node_modules -R' EXIT && \
@@ -21,8 +22,8 @@ exec docker run \
         umask 000 && \
         printf \"@economist:registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n\" > ~/.npmrc && \
         (curl -I ${SINOPIA_URL} --max-time 5 && npm set registry ${SINOPIA_URL} && echo \"Using sinopia cache registry available on ${SINOPIA_URL}\" || true) && \
-        NODE_ENV=test npm i && \
-        npm run doc:js
+        npm i && \
+        npm run doc:js && \
         SAUCE_USERNAME=${SAUCE_USERNAME} SAUCE_ACCESS_KEY=${SAUCE_ACCESS_KEY} npm t && \
         { git config --global user.email 'ecprod@economist.com'; git config --global user.name 'GoCD'; true; } && \
         { [ \"$(git rev-parse --abbrev-ref HEAD)\" != \"master\" ] || npm run pages; } ; \
