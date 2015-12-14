@@ -29,7 +29,7 @@ export default class AdPanel extends React.Component {
     return {
       animated: true,
       lazyLoad: true,
-      lazyLoadMargin: 350,
+      lazyLoadMargin: 600,
       sizes: [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ],
       sizeMapping: [
         [[980, 200], [[1024, 768]]],
