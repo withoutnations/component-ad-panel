@@ -14,6 +14,7 @@ export default class AdPanel extends React.Component {
       lazyLoadMargin: React.PropTypes.number,
       sizes: React.PropTypes.arrayOf(React.PropTypes.array),
       sizeMapping: React.PropTypes.arrayOf(React.PropTypes.array),
+      onFailure: React.PropTypes.func,
       targeting: React.PropTypes.arrayOf(
         React.PropTypes.arrayOf(
           React.PropTypes.string
@@ -136,6 +137,9 @@ export default class AdPanel extends React.Component {
       if (ev.isEmpty) {
         this.setState({ adFailed: true });
         this.cleanupEventListeners();  // not interested in 'scroll' and 'resize' events any more
+        if (this.props.onFailure) {
+          this.props.onFailure();
+        }
         return;
       }
       this.unlistenSlotRenderEnded();
