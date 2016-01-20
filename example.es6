@@ -43,6 +43,22 @@ export default (
         mel no viderer inermis concludaturque. Ea eum omnis propriae, ea justo doming mediocrem pri. Nam eu paulo
          platonem pertinacia. Everti scripta pro ne, est an oratio euismod.</p>
 
+       <AdPanel adTag="/5605/teg.fmsq/wdif/busi"
+       sizes={[ [ 300, 250 ] ]}
+       block={true}
+       targeting={
+         [
+           [ 'pos', 'something' ],
+           [ 'other_key', 'something_else' ],
+         ]
+       }
+       sizeMapping={
+         [
+           [ [ 1024, 768 ], [ [ 300, 250 ] ] ],
+         ]
+       }
+       reserveHeight={250} />
+
       <p>No cum omnis epicurei, an elitr ludus qualisque cum. Ludus alienum iudicabit id qui. Convenire incorrupte
        reprehendunt id eum. Solum clita quo id. Nisl sale inimicus ea sea, per quem timeam tamquam ad.</p>
 
@@ -90,6 +106,7 @@ export default (
     </div>
     <AdPanel adTag="/5605/teg.fmsq/wdif/busi"
     sizes={[ [ 300, 250 ] ]}
+    styled={true}
     targeting={
       [
         [ 'pos', 'something' ],
