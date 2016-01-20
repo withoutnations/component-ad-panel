@@ -22,6 +22,7 @@ export default class AdPanel extends React.Component {
       ),
       reserveHeight: React.PropTypes.number,
       styled: React.PropTypes.bool,
+      block: React.PropTypes.bool,
       googletag: React.PropTypes.object,  // Testing hook
     };
   }
@@ -203,6 +204,9 @@ export default class AdPanel extends React.Component {
     let rootClassNames = [ 'ad-panel__container' ];
     if (this.props.styled) {
       rootClassNames = rootClassNames.concat([ 'ad-panel__container--styled' ]);
+    }
+    if (this.props.block) {
+      rootClassNames = rootClassNames.concat([ 'ad-panel__container--block' ]);
     }
     if (this.props.animated) {
       rootClassNames = rootClassNames.concat([ 'ad-panel__animated' ]);
