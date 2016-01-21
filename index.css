@@ -56,6 +56,11 @@
   padding-bottom:2em;
 }
 
+.ad-panel__container--block .ad-panel__googlead {
+  padding-left: 0;
+  margin-top: 0;
+}
+
 .ad-panel__container iframe,
 .ad-panel__container img{
   margin: 0 auto;
