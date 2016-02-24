@@ -12,6 +12,11 @@
   display: inline-block;
 }
 
+/* Don'r render the "Advertisement" text when the ad loads nothing into the panel */
+.ad-panel__container--styled .ad-panel__googlead:empty {
+  display: none;
+}
+
 .ad-panel__container--styled .ad-panel__googlead::before,
 .ad-panel__container--styled .ad-panel__googlead {
   background-color: var(--color-berlin);
