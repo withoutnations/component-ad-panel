@@ -169,44 +169,69 @@ describe('AdPanel', () => {
         pubAds.collapseEmptyDivs.should.have.been.called();
       });
 
+      it('binds props.onImpressionViewable to impressionViewable if available', () => {
+        const onImpressionViewable = instance.props.onImpressionViewable = chai.spy();
+        instance.generateAd();
+        googleTag.cmd.should.have.lengthOf(1);
+        googleTag.cmd.forEach((callback) => callback());
+        googleTag.pubads().addEventListener
+          .should.have.been.called.at.least(1)
+          .with('impressionViewable', onImpressionViewable);
+      });
+
+      it('binds props.onSlotVisibilityChanged to slotVisibilityChanged if available', () => {
+        const onSlotVisibilityChanged = instance.props.onSlotVisibilityChanged = chai.spy();
+        instance.generateAd();
+        googleTag.cmd.should.have.lengthOf(1);
+        googleTag.cmd.forEach((callback) => callback());
+        googleTag.pubads().addEventListener
+          .should.have.been.called.at.least(1)
+          .with('slotVisibilityChanged', onSlotVisibilityChanged);
+      });
+
       describe('slotRenderEnded listener', () => {
+        let pubAds = null;
+        let slotRenderEndedEventListener = null;
+        let slotData = null;
         beforeEach(() => {
           instance.generateAd();
           googleTag.cmd.should.have.lengthOf(1);
           googleTag.cmd.forEach((callback) => callback());
+          pubAds = googleTag.pubads();
+          googleTag.cmd.should.have.lengthOf(1);
+          googleTag.cmd.forEach((callback) => callback());
           chai.spy.on(instance, 'unlistenSlotRenderEnded');
           chai.spy.on(instance, 'cleanupEventListeners');
+          slotRenderEndedEventListener = getSpyCall(pubAds.addEventListener, 0)[1];
+          slotData = { slot: instance.adSlot, isEmpty: false };
         });
 
         it('is attached', () => {
-          const pubAds = googleTag.pubads();
-          pubAds.addEventListener.should.have.been.called(1).with('slotRenderEnded');
+          pubAds.addEventListener.should.have.been.with('slotRenderEnded');
+        });
+
+        it('calls props.onSlotRenderEnded if available', () => {
+          const onSlotRenderEnded = instance.props.onSlotRenderEnded = chai.spy();
+          slotRenderEndedEventListener(slotData);
+          onSlotRenderEnded.should.have.been.with(slotData);
         });
 
         it('calls setState({ adFailed: true }) and cleanupEventListeners if it receives an event ' +
           'from DFP telling it that there is no ad for the zone', () => {
-          const pubAds = googleTag.pubads();
-          googleTag.cmd.should.have.lengthOf(1);
-          googleTag.cmd.forEach((callback) => callback());
-          pubAds.addEventListener.should.have.been.called.at.least(1);
-          getSpyCall(pubAds.addEventListener, 0)[1]({ slot: instance.adSlot, isEmpty: true });
+          slotData.isEmpty = true;
+          slotRenderEndedEventListener(slotData);
           instance.setState.should.have.been.called.with({ adFailed: true });
           instance.cleanupEventListeners.should.have.been.called();
         });
 
         it('only calls unlistenSlotRenderEnded if DFP tells it the ad is okay', () => {
-          const pubAds = googleTag.pubads();
-          pubAds.addEventListener.should.have.been.called();
-          getSpyCall(pubAds.addEventListener, 0)[1]({ slot: instance.adSlot, isEmpty: false });
-          instance.setState.should.not.have.been.called.with({ adFailed: true });
-          instance.cleanupEventListeners.should.not.have.been.called();
+          slotRenderEndedEventListener(slotData);
           instance.unlistenSlotRenderEnded.should.have.been.called();
         });
 
         it('does nothing if the slot is wrong', () => {
-          const pubAds = googleTag.pubads();
-          pubAds.addEventListener.should.have.been.called.at.least(1);
-          getSpyCall(pubAds.addEventListener, 0)[1]({ slot: { wrong: 'slot' }, isEmpty: false });
+          slotData.slot = { wrong: 'slot' };
+          slotRenderEndedEventListener(slotData);
           instance.setState.should.not.have.been.called.with({ adFailed: true });
           instance.cleanupEventListeners.should.not.have.been.called();
           instance.unlistenSlotRenderEnded.should.not.have.been.called();
@@ -218,9 +243,7 @@ describe('AdPanel', () => {
           });
 
           it('disables the slotRenderEnded listener', () => {
-            const pubAds = googleTag.pubads();
-            pubAds.addEventListener.should.have.been.called.at.least(1);
-            getSpyCall(pubAds.addEventListener, 0)[1]({ slot: instance.adSlot, isEmpty: false });
+            slotRenderEndedEventListener(slotData);
             instance.setState.should.not.have.been.called.with({ adFailed: true });
             instance.cleanupEventListeners.should.not.have.been.called();
           });

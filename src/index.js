@@ -139,6 +139,9 @@ export default class AdPanel extends React.Component {
       if (stopListening || slotRenderEndedEvent.slot !== slot) {
         return;
       }
+      if (this.props.onSlotRenderEnded) {
+        this.props.onSlotRenderEnded(slotRenderEndedEvent);
+      }
       if (slotRenderEndedEvent.isEmpty) {
         this.setState({ adFailed: true });
         this.cleanupEventListeners();
@@ -180,11 +183,18 @@ export default class AdPanel extends React.Component {
       for (const [ key, value ] of this.props.targeting) {
         this.adSlot.setTargeting(key, value);
       }
-      googleTag.pubads().enableSingleRequest();
-      googleTag.pubads().collapseEmptyDivs();
+      const pubAds = googleTag.pubads();
+      pubAds.enableSingleRequest();
+      pubAds.collapseEmptyDivs();
       googleTag.enableServices();
       googleTag.display(this.state.tagId);
       this.listenToSlotRenderEnded({ googleTag });
+      if (this.props.onImpressionViewable) {
+        pubAds.addEventListener('impressionViewable', this.props.onImpressionViewable);
+      }
+      if (this.props.onSlotVisibilityChanged) {
+        pubAds.addEventListener('slotVisibilityChanged', this.props.onSlotVisibilityChanged);
+      }
     });
   }
 
@@ -257,5 +267,8 @@ if (process.env.NODE_ENV !== 'production') {
     reserveHeight: React.PropTypes.number,
     styled: React.PropTypes.bool,
     block: React.PropTypes.bool,
+    onSlotRenderEnded: React.PropTypes.func,
+    onSlotVisibilityChanged: React.PropTypes.func,
+    onImpressionViewable: React.PropTypes.func,
   };
 }
