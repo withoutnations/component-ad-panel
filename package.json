@@ -160,7 +160,7 @@
     "npm-watch": "0.0.1",
     "parallelshell": "^2.0.0",
     "pre-commit": "^1.0.10",
-    "react": "^0.14.7",
+    "react": "^0.14.8",
     "watchify": "^3.4.0"
   },
   "peerDependencies": {
