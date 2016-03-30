@@ -1,0 +1,76 @@
+.ad-panel__container {
+  display: inline-block;
+  position: relative;
+  font-size: 1rem;
+}
+
+/* Don'r render the 'Advertisement' text when the ad loads nothing into the panel */
+
+.ad-panel__container--styled .ad-panel__googlead:empty {
+  display: none;
+}
+
+.ad-panel__container--styled .ad-panel__googlead::before,
+.ad-panel__container--styled .ad-panel__googlead {
+  background-color: var(--ad-panel--background-color, #f2f2f2);
+}
+
+.ad-panel__container--styled .ad-panel__googlead {
+  margin-top: var(--ad-panel-title-size, 1.7em);
+  padding-left: var(--ad-left-strip-width, 5px);
+}
+
+.ad-panel__container--styled .ad-panel__googlead::before {
+  content: attr(title);
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: var(--ad-left-strip-width, 5px);
+  color: var(--ad-panel--background-color, #b6b6b6);
+  font-family: var(--ad-panel-fontfamily, sans-serif);
+  font-size: var(--ad-panel-text-size-step, 1em);
+  line-height: var(--ad-panel-line-height, 2);
+  border-top-left-radius: calc(var(--ad-left-strip-width, 5px) / 2);
+  border-top-right-radius: calc(var(--ad-left-strip-width, 5px) / 2);
+  z-index: -1;
+}
+
+.ad-panel__container--block {
+  display: block;
+}
+
+.ad-panel__container--block .ad-panel__googlead {
+  margin-top: 0;
+  padding-top: 0.35em;
+  padding-bottom: 2em;
+  padding-left: 0;
+  background-color: var(--ad-panel--background-color, #f2f2f2);
+}
+
+.ad-panel__container--block .ad-panel__googlead::before {
+  position: inherit;
+  line-height: var(--ad-panel-line-height, 2.5);
+  background-color: var(--ad-panel--background-color, #f2f2f2);
+}
+
+/* stylelint-disable selector-no-type */
+
+.ad-panel__container iframe,
+.ad-panel__container img {
+  display: block;
+  margin: 0 auto;
+}
+
+/* stylelint-enable selector-no-type */
+
+.ad-panel__animated {
+  opacity: 0;
+  transform: translateY(100px);
+  transition: all 0.4s ease-out 0.5s;
+  transition-property: opacity, transform;
+}
+
+.ad-panel__animated.ad-panel--visible {
+  opacity: 1;
+  transform: translateY(0);
+}

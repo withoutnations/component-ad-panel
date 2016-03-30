@@ -1,41 +1,40 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDom from 'react-dom';
+import values from 'lodash.values';
+function uniqueId() {
+  const mathRandomToIntMultiplier = 1e17;
+  const hex = 16;
+  return (Math.random() * mathRandomToIntMultiplier).toString(hex);
+}
 
 /* global window: false */
 /* global document: false */
 export default class AdPanel extends React.Component {
-
-  static get propTypes() {
-    return {
-      animated: React.PropTypes.bool,
-      adTag: React.PropTypes.string.isRequired,
-      className: React.PropTypes.string,
-      lazyLoad: React.PropTypes.bool,
-      lazyLoadMargin: React.PropTypes.number,
-      sizes: React.PropTypes.arrayOf(React.PropTypes.array),
-      sizeMapping: React.PropTypes.arrayOf(React.PropTypes.array),
-      onFailure: React.PropTypes.func,
-      targeting: React.PropTypes.arrayOf(
-        React.PropTypes.arrayOf(
-          React.PropTypes.string
-        )
-      ),
-      reserveHeight: React.PropTypes.number,
-      styled: React.PropTypes.bool,
-      block: React.PropTypes.bool,
-      googletag: React.PropTypes.object,  // Testing hook
-    };
-  }
 
   static get defaultProps() {
     return {
       animated: true,
       lazyLoad: true,
       lazyLoadMargin: 600,
-      sizes: [ [ 60, 60 ], [ 70, 70 ], [ 300, 250 ], [ 1024, 768 ] ],
+      sizes: [
+        { width: 60, height: 60 },
+        { width: 70, height: 70 },
+        { width: 300, height: 250 },
+        { width: 1024, height: 768 },
+      ],
       sizeMapping: [
-        [[980, 200], [[1024, 768]]],
-        [[0, 0], [[300, 250]]],
+        [
+          { width: 980, height: 200 },
+          [
+            { width: 1024, height: 768 },
+          ],
+        ],
+        [
+          { width: 0, height: 0 },
+          [
+            { width: 300, height: 250 },
+          ],
+        ],
       ],
       targeting: [],
       styled: true,
@@ -50,7 +49,7 @@ export default class AdPanel extends React.Component {
 
   componentWillMount() {
     this.setState({
-      tagId: `googlead-${(Math.random() * 1e17) .toString(16)}`,
+      tagId: `googlead-${ uniqueId() }`,
       adGenerated: false,
       adFailed: false,
     });
@@ -73,34 +72,37 @@ export default class AdPanel extends React.Component {
   }
 
   getOrCreateGoogleTag() {
-    /* global window document */
-    if (this.props.googletag) {
-      return this.props.googletag;
-    } else if (typeof window !== 'undefined' && window.document &&
-        !window.googletag) {
-      window.googletag = { cmd: [] };
-      const gads = document.createElement('script');
-      gads.async = true;
-      gads.type = 'text/javascript';
-      const useSsl = window.location.protocol === 'https:';
-      gads.src = `${useSsl ? 'https:' : 'http:'}//www.googletagservices.com/tag/js/gpt.js`;
-      document.head.appendChild(gads);
-      return window.googletag;
-    } else if (typeof window !== 'undefined' && window.googletag) {
+    /* global window: false */
+    if (typeof window === 'undefined' || typeof window.document === 'undefined') {
+      return null;
+    }
+    if (window.googletag) {
       return window.googletag;
     }
+    window.googletag = { cmd: [] };
+    const gads = document.createElement('script');
+    gads.async = true;
+    gads.type = 'text/javascript';
+    const useSsl = window.location.protocol === 'https:';
+    gads.src = `${ useSsl ? 'https:' : 'http:' }//www.googletagservices.com/tag/js/gpt.js`;
+    window.document.head.appendChild(gads);
+    return window.googletag;
   }
 
   isElementInViewport(elm, margin = 0) {
-    const rect = this.getContainerDOMElement().getBoundingClientRect();
+    const containerElement = this.getContainerDomElement();
+    if (!containerElement || typeof containerElement.getBoundingClientRect !== 'function') {
+      return false;
+    }
+    const rect = this.getContainerDomElement().getBoundingClientRect();
     return rect.bottom > -margin &&
       rect.right > -margin &&
       rect.left < (window.innerWidth || document.documentElement.clientWidth) + margin &&
       rect.top < (window.innerHeight || document.documentElement.clientHeight) + margin;
   }
 
-  getContainerDOMElement() {
-    return ReactDOM.findDOMNode(this.refs.container);
+  getContainerDomElement() {
+    return ReactDom.findDOMNode(this.refs.container);
   }
 
   loadElementWhenInView() {
@@ -110,7 +112,7 @@ export default class AdPanel extends React.Component {
       this.generateAd();
     }
     if (this.isElementInViewport(containerElement) === true) {
-      const targetContainerElement = this.getContainerDOMElement();
+      const targetContainerElement = this.getContainerDomElement();
       targetContainerElement.className += ' ad-panel--visible';
       this.cleanupEventListeners();
     }
@@ -131,38 +133,41 @@ export default class AdPanel extends React.Component {
     }
 
     const slot = this.adSlot;
-    let unlistened = false;
-    const slotRenderEndedListener = (ev) => {
-      if (unlistened) { return; }  // the GPT API doesn't have a removeEventListener function
-      if (ev.slot !== slot) { return; }
-      if (ev.isEmpty) {
+    // the GPT API doesn't have a removeEventListener function
+    let stopListening = false;
+    googleTag.pubads().addEventListener('slotRenderEnded', (slotRenderEndedEvent) => {
+      if (stopListening || slotRenderEndedEvent.slot !== slot) {
+        return;
+      }
+      if (this.props.onSlotRenderEnded) {
+        this.props.onSlotRenderEnded(slotRenderEndedEvent);
+      }
+      if (slotRenderEndedEvent.isEmpty) {
         this.setState({ adFailed: true });
-        this.cleanupEventListeners();  // not interested in 'scroll' and 'resize' events any more
+        this.cleanupEventListeners();
         if (this.props.onFailure) {
           this.props.onFailure();
         }
         return;
       }
       this.unlistenSlotRenderEnded();
-    };
-
-    googleTag.pubads().addEventListener('slotRenderEnded', slotRenderEndedListener);
-
+    });
     this.unlistenSlotRenderEnded = () => {
-      unlistened = true;
+      stopListening = true;
+      return null;
     };
   }
 
   buildSizeMapping() {
-    let mapping = this.props.sizeMapping || [];
+    const mapping = this.props.sizeMapping || [];
     const googleTag = this.getOrCreateGoogleTag();
     if (!googleTag.sizeMapping) {
       throw new Error('buildSizeMapping() must be called inside a googletag.cmd.push()\'ed function!');
     }
     const sizeMappingBuilder = googleTag.sizeMapping();
-    return mapping.reduce((builder, [viewportSize, adSizes]) => {
-      return builder.addSize(viewportSize, adSizes)
-    }, sizeMappingBuilder).build();
+    return mapping.reduce((builder, [ viewportSize, adSizes ]) => (
+      builder.addSize(values(viewportSize), adSizes.map(values))
+    ), sizeMappingBuilder).build();
   }
 
   generateAd() {
@@ -170,22 +175,26 @@ export default class AdPanel extends React.Component {
     const googleTag = this.getOrCreateGoogleTag();
     googleTag.cmd.push(() => {
       const sizeMapping = this.buildSizeMapping();
-      let slot = this.adSlot = googleTag.defineSlot(
-        this.props.adTag,
-        this.props.sizes,
-        this.state.tagId)
+      const { adTag, sizes } = this.props;
+      const { tagId } = this.state;
+      this.adSlot = googleTag.defineSlot(adTag, (sizes || []).map(values), tagId)
         .addService(googleTag.pubads())
         .defineSizeMapping(sizeMapping);
-
       for (const [ key, value ] of this.props.targeting) {
-        slot.setTargeting(key, value)
+        this.adSlot.setTargeting(key, value);
       }
-      googleTag.pubads().enableSingleRequest();
-      googleTag.pubads().collapseEmptyDivs();
+      const pubAds = googleTag.pubads();
+      pubAds.enableSingleRequest();
+      pubAds.collapseEmptyDivs();
       googleTag.enableServices();
       googleTag.display(this.state.tagId);
-
       this.listenToSlotRenderEnded({ googleTag });
+      if (this.props.onImpressionViewable) {
+        pubAds.addEventListener('impressionViewable', this.props.onImpressionViewable);
+      }
+      if (this.props.onSlotVisibilityChanged) {
+        pubAds.addEventListener('slotVisibilityChanged', this.props.onSlotVisibilityChanged);
+      }
     });
   }
 
@@ -199,7 +208,14 @@ export default class AdPanel extends React.Component {
       if (this.props.reserveHeight) {
         adStyle = { minHeight: this.props.reserveHeight };
       }
-      tag = (<div className="ad-panel__googlead" id={this.state.tagId} style={adStyle} title="Advertisement"></div>);
+      tag = (
+        <div
+          className="ad-panel__googlead"
+          id={this.state.tagId}
+          style={adStyle}
+          title="Advertisement"
+        ></div>
+      );
     }
     let rootClassNames = [ 'ad-panel__container' ];
     if (this.props.styled) {
@@ -212,7 +228,7 @@ export default class AdPanel extends React.Component {
       rootClassNames = rootClassNames.concat([ 'ad-panel__animated' ]);
     }
     if (this.props.className) {
-      rootClassNames = rootClassNames.concat([ this.props.className ])
+      rootClassNames = rootClassNames.concat([ this.props.className ]);
     }
     const aria = {
       role: 'complementary',
@@ -224,4 +240,35 @@ export default class AdPanel extends React.Component {
       </div>
     );
   }
+}
+
+if (process.env.NODE_ENV !== 'production') {
+  const sizeObject = React.PropTypes.oneOf(
+    React.PropTypes.arrayOf(React.PropTypes.number),
+    React.PropTypes.shape({
+      width: React.PropTypes.number,
+      height: React.PropTypes.number,
+    })
+  );
+  AdPanel.propTypes = {
+    animated: React.PropTypes.bool,
+    adTag: React.PropTypes.string.isRequired,
+    className: React.PropTypes.string,
+    lazyLoad: React.PropTypes.bool,
+    lazyLoadMargin: React.PropTypes.number,
+    sizes: React.PropTypes.arrayOf(sizeObject),
+    sizeMapping: React.PropTypes.arrayOf(
+      React.PropTypes.arrayOf(
+        sizeObject
+      )
+    ),
+    onFailure: React.PropTypes.func,
+    targeting: React.PropTypes.arrayOf(React.PropTypes.arrayOf(sizeObject)),
+    reserveHeight: React.PropTypes.number,
+    styled: React.PropTypes.bool,
+    block: React.PropTypes.bool,
+    onSlotRenderEnded: React.PropTypes.func,
+    onSlotVisibilityChanged: React.PropTypes.func,
+    onImpressionViewable: React.PropTypes.func,
+  };
 }
