@@ -1,16 +1,31 @@
+/* global window: false */
+/* global document: false */
 import React from 'react';
 import ReactDom from 'react-dom';
 import values from 'lodash.values';
+
 function uniqueId() {
   const mathRandomToIntMultiplier = 1e17;
   const hex = 16;
   return (Math.random() * mathRandomToIntMultiplier).toString(hex);
 }
 
-/* global window: false */
-/* global document: false */
-export default class AdPanel extends React.Component {
+let adPanelConfig = {};
+const adDivs = [];
+function displayAdsFn(googleTag) {
+  if (!adDivs.length) {
+    return;
+  }
+  googleTag.enableServices();
+  adDivs.forEach((div) => {
+    googleTag.display(div);
+  });
 
+  // Clean up
+  adDivs.length = 0;
+}
+
+export default class AdPanel extends React.Component {
   static get defaultProps() {
     return {
       animated: true,
@@ -41,6 +56,59 @@ export default class AdPanel extends React.Component {
     };
   }
 
+  static config(options) {
+    const googleTag = AdPanel.getOrCreateGoogleTag();
+    adPanelConfig = options;
+
+    googleTag.cmd.push(() => {
+      const pubAds = googleTag.pubads();
+      const targeting = adPanelConfig.targeting;
+      // Set targeting
+      pubAds.setTargeting('subs', targeting.subscriber);
+
+      if (targeting.etear) {
+        pubAds.setTargeting('etear', targeting.etear);
+      }
+
+      if (adPanelConfig.sra) {
+        // enables Single Request Architecture (SRA)
+        pubAds.enableSingleRequest();
+      }
+
+      // Collapses empty div elements on a page when there is no ad content to display.
+      pubAds.collapseEmptyDivs();
+    });
+  }
+
+  static displayAds() {
+    const googleTag = AdPanel.getOrCreateGoogleTag();
+    if (typeof googleTag.display === 'function') {
+      displayAdsFn(googleTag);
+    } else {
+      googleTag.cmd.push(() => {
+        displayAdsFn(googleTag);
+      });
+    }
+  }
+
+  static getOrCreateGoogleTag() {
+    /* global window: false */
+    if (typeof window === 'undefined' || typeof window.document === 'undefined') {
+      return null;
+    }
+    if (window.googletag) {
+      return window.googletag;
+    }
+    window.googletag = { cmd: [] };
+    const gads = document.createElement('script');
+    gads.async = true;
+    gads.type = 'text/javascript';
+    const useSsl = window.location.protocol === 'https:';
+    gads.src = `${ useSsl ? 'https:' : 'http:' }//www.googletagservices.com/tag/js/gpt.js`;
+    window.document.head.appendChild(gads);
+    return window.googletag;
+  }
+
   constructor(...args) {
     super(...args);
     this.loadElementWhenInView = this.loadElementWhenInView.bind(this);
@@ -57,36 +125,20 @@ export default class AdPanel extends React.Component {
 
   componentDidMount() {
     if (this.state && this.state.tagId) {
-      this.getOrCreateGoogleTag();
+      AdPanel.getOrCreateGoogleTag();
     }
     if (!this.props.lazyLoad && this.state && this.state.tagId && !this.state.adGenerated) {
       this.generateAd();
     }
-    window.addEventListener('scroll', this.loadElementWhenInView);
-    window.addEventListener('resize', this.loadElementWhenInView);
-    this.loadElementWhenInView();
+    if (this.props.lazyLoad) {
+      window.addEventListener('scroll', this.loadElementWhenInView);
+      window.addEventListener('resize', this.loadElementWhenInView);
+      this.loadElementWhenInView();
+    }
   }
 
   componentWillUnmount() {
     this.cleanupEventListeners();
-  }
-
-  getOrCreateGoogleTag() {
-    /* global window: false */
-    if (typeof window === 'undefined' || typeof window.document === 'undefined') {
-      return null;
-    }
-    if (window.googletag) {
-      return window.googletag;
-    }
-    window.googletag = { cmd: [] };
-    const gads = document.createElement('script');
-    gads.async = true;
-    gads.type = 'text/javascript';
-    const useSsl = window.location.protocol === 'https:';
-    gads.src = `${ useSsl ? 'https:' : 'http:' }//www.googletagservices.com/tag/js/gpt.js`;
-    window.document.head.appendChild(gads);
-    return window.googletag;
   }
 
   isElementInViewport(elm, margin = 0) {
@@ -160,7 +212,7 @@ export default class AdPanel extends React.Component {
 
   buildSizeMapping() {
     const mapping = this.props.sizeMapping || [];
-    const googleTag = this.getOrCreateGoogleTag();
+    const googleTag = AdPanel.getOrCreateGoogleTag();
     if (!googleTag.sizeMapping) {
       throw new Error('buildSizeMapping() must be called inside a googletag.cmd.push()\'ed function!');
     }
@@ -171,8 +223,10 @@ export default class AdPanel extends React.Component {
   }
 
   generateAd() {
-    this.setState({ adGenerated: true });
-    const googleTag = this.getOrCreateGoogleTag();
+    const googleTag = AdPanel.getOrCreateGoogleTag();
+    if (typeof this.props.adTag === 'undefined') {
+      return;
+    }
     googleTag.cmd.push(() => {
       const sizeMapping = this.buildSizeMapping();
       const { adTag, sizes } = this.props;
@@ -184,10 +238,16 @@ export default class AdPanel extends React.Component {
         this.adSlot.setTargeting(key, value);
       }
       const pubAds = googleTag.pubads();
-      pubAds.enableSingleRequest();
-      pubAds.collapseEmptyDivs();
-      googleTag.enableServices();
-      googleTag.display(this.state.tagId);
+      if (adPanelConfig.sra) {
+        adDivs.push(tagId);
+        if (typeof this.props.onSlotDefined === 'function') {
+          this.props.onSlotDefined(tagId);
+        }
+      } else {
+        googleTag.enableServices();
+        googleTag.display(tagId);
+      }
+
       this.listenToSlotRenderEnded({ googleTag });
       if (this.props.onImpressionViewable) {
         pubAds.addEventListener('impressionViewable', this.props.onImpressionViewable);
@@ -196,6 +256,7 @@ export default class AdPanel extends React.Component {
         pubAds.addEventListener('slotVisibilityChanged', this.props.onSlotVisibilityChanged);
       }
     });
+    this.setState({ adGenerated: true });
   }
 
   render() {
@@ -263,6 +324,7 @@ if (process.env.NODE_ENV !== 'production') {
       )
     ),
     onFailure: React.PropTypes.func,
+    onSlotDefined: React.PropTypes.func,
     targeting: React.PropTypes.arrayOf(React.PropTypes.arrayOf(sizeObject)),
     reserveHeight: React.PropTypes.number,
     styled: React.PropTypes.bool,
