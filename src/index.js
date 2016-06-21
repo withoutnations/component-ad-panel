@@ -1,8 +1,25 @@
 /* global window: false */
 /* global document: false */
 import React from 'react';
-import ReactDom from 'react-dom';
-import values from 'lodash.values';
+
+function heightWidthPair(hwPair) {
+  if (Array.isArray(hwPair) && hwPair.length === 0) {
+    return hwPair;
+  }
+  if (
+    typeof hwPair.width === 'number' &&
+    typeof hwPair.height === 'number'
+  ) {
+    return [ hwPair.width, hwPair.height ];
+  }
+  if (
+    typeof hwPair[0] === 'number' &&
+    typeof hwPair[1] === 'number'
+  ) {
+    return hwPair;
+  }
+  throw new Error(`AdPanel: Invalid height/width pair ${ JSON.stringify(hwPair) }`);
+}
 
 function uniqueId() {
   const mathRandomToIntMultiplier = 1e17;
@@ -28,29 +45,8 @@ function displayAdsFn(googleTag) {
 export default class AdPanel extends React.Component {
   static get defaultProps() {
     return {
-      animated: true,
-      lazyLoad: true,
-      lazyLoadMargin: 600,
-      sizes: [
-        { width: 60, height: 60 },
-        { width: 70, height: 70 },
-        { width: 300, height: 250 },
-        { width: 1024, height: 768 },
-      ],
-      sizeMapping: [
-        [
-          { width: 980, height: 200 },
-          [
-            { width: 1024, height: 768 },
-          ],
-        ],
-        [
-          { width: 0, height: 0 },
-          [
-            { width: 300, height: 250 },
-          ],
-        ],
-      ],
+      sizes: [],
+      sizeMapping: [],
       targeting: [],
       styled: true,
     };
@@ -111,7 +107,6 @@ export default class AdPanel extends React.Component {
 
   constructor(...args) {
     super(...args);
-    this.loadElementWhenInView = this.loadElementWhenInView.bind(this);
     this.unlistenSlotRenderEnded = () => null;
   }
 
@@ -125,54 +120,48 @@ export default class AdPanel extends React.Component {
 
   componentDidMount() {
     if (this.state && this.state.tagId) {
-      AdPanel.getOrCreateGoogleTag();
-    }
-    if (!this.props.lazyLoad && this.state && this.state.tagId && !this.state.adGenerated) {
       this.generateAd();
     }
-    if (this.props.lazyLoad) {
-      window.addEventListener('scroll', this.loadElementWhenInView);
-      window.addEventListener('resize', this.loadElementWhenInView);
-      this.loadElementWhenInView();
+  }
+
+  componentWillUpdate(nextProps) {
+    if (this.adSlot) {
+      /* eslint-disable arrow-body-style */
+      const didChange = (prop) => {
+        return (
+          (prop in this.props) &&
+          (prop in nextProps) &&
+          JSON.stringify(this.props[prop]) !== JSON.stringify(nextProps[prop])
+        );
+      };
+      /* eslint-enable arrow-body-style */
+      const didAnyAdRelatedPropChange =
+        didChange('adTag') ||
+        didChange('targeting') ||
+        didChange('sizes') ||
+        didChange('sizeMapping');
+      if (didAnyAdRelatedPropChange) {
+        const googleTag = AdPanel.getOrCreateGoogleTag();
+        this.destroySlot();
+        this.defineSlot(googleTag);
+      }
     }
   }
 
   componentWillUnmount() {
     this.cleanupEventListeners();
+    this.destroySlot();
   }
 
-  isElementInViewport(elm, margin = 0) {
-    const containerElement = this.getContainerDomElement();
-    if (!containerElement || typeof containerElement.getBoundingClientRect !== 'function') {
-      return false;
+  destroySlot() {
+    // This is always synchronous.
+    if (typeof window.googletag !== 'undefined' && this.adSlot) {
+      window.googletag.destroySlots([ this.adSlot ]);
     }
-    const rect = this.getContainerDomElement().getBoundingClientRect();
-    return rect.bottom > -margin &&
-      rect.right > -margin &&
-      rect.left < (window.innerWidth || document.documentElement.clientWidth) + margin &&
-      rect.top < (window.innerHeight || document.documentElement.clientHeight) + margin;
-  }
-
-  getContainerDomElement() {
-    return ReactDom.findDOMNode(this.refs.container);
-  }
-
-  loadElementWhenInView() {
-    const containerElement = this.refs.container;
-    if (!this.state.adGenerated &&
-        this.isElementInViewport(containerElement, this.props.lazyLoadMargin)) {
-      this.generateAd();
-    }
-    if (this.isElementInViewport(containerElement) === true) {
-      const targetContainerElement = this.getContainerDomElement();
-      targetContainerElement.className += ' ad-panel--visible';
-      this.cleanupEventListeners();
-    }
+    this.adSlot = null;
   }
 
   cleanupEventListeners() {
-    window.removeEventListener('scroll', this.loadElementWhenInView);
-    window.removeEventListener('resize', this.loadElementWhenInView);
     this.unlistenSlotRenderEnded();
   }
 
@@ -218,7 +207,7 @@ export default class AdPanel extends React.Component {
     }
     const sizeMappingBuilder = googleTag.sizeMapping();
     return mapping.reduce((builder, [ viewportSize, adSizes ]) => (
-      builder.addSize(values(viewportSize), adSizes.map(values))
+      builder.addSize(heightWidthPair(viewportSize), adSizes.map(heightWidthPair))
     ), sizeMappingBuilder).build();
   }
 
@@ -228,35 +217,48 @@ export default class AdPanel extends React.Component {
       return;
     }
     googleTag.cmd.push(() => {
-      const sizeMapping = this.buildSizeMapping();
-      const { adTag, sizes } = this.props;
-      const { tagId } = this.state;
-      this.adSlot = googleTag.defineSlot(adTag, (sizes || []).map(values), tagId)
-        .addService(googleTag.pubads())
-        .defineSizeMapping(sizeMapping);
-      for (const [ key, value ] of this.props.targeting) {
-        this.adSlot.setTargeting(key, value);
-      }
-      const pubAds = googleTag.pubads();
-      if (adPanelConfig.sra) {
-        adDivs.push(tagId);
-        if (typeof this.props.onSlotDefined === 'function') {
-          this.props.onSlotDefined(tagId);
+      try {
+        this.defineSlot(googleTag);
+      } catch (errorFromDefineSlot) {
+        // Google catches this and hides it from us
+        if (typeof console !== 'undefined') {
+          /* eslint-disable no-console */
+          console.error(errorFromDefineSlot);
+          /* eslint-enable no-console */
         }
-      } else {
-        googleTag.enableServices();
-        googleTag.display(tagId);
-      }
-
-      this.listenToSlotRenderEnded({ googleTag });
-      if (this.props.onImpressionViewable) {
-        pubAds.addEventListener('impressionViewable', this.props.onImpressionViewable);
-      }
-      if (this.props.onSlotVisibilityChanged) {
-        pubAds.addEventListener('slotVisibilityChanged', this.props.onSlotVisibilityChanged);
       }
     });
     this.setState({ adGenerated: true });
+  }
+
+  defineSlot(googleTag) {
+    const sizeMapping = this.buildSizeMapping();
+    const { adTag, sizes } = this.props;
+    const { tagId } = this.state;
+    this.adSlot = googleTag.defineSlot(adTag, (sizes || []).map(heightWidthPair), tagId)
+      .addService(googleTag.pubads())
+      .defineSizeMapping(sizeMapping);
+    for (const [ key, value ] of this.props.targeting) {
+      this.adSlot.setTargeting(key, value);
+    }
+    const pubAds = googleTag.pubads();
+    if (adPanelConfig.sra) {
+      adDivs.push(tagId);
+      if (typeof this.props.onSlotDefined === 'function') {
+        this.props.onSlotDefined(tagId);
+      }
+    } else {
+      googleTag.enableServices();
+      googleTag.display(tagId);
+    }
+
+    this.listenToSlotRenderEnded({ googleTag });
+    if (this.props.onImpressionViewable) {
+      pubAds.addEventListener('impressionViewable', this.props.onImpressionViewable);
+    }
+    if (this.props.onSlotVisibilityChanged) {
+      pubAds.addEventListener('slotVisibilityChanged', this.props.onSlotVisibilityChanged);
+    }
   }
 
   render() {
@@ -285,9 +287,6 @@ export default class AdPanel extends React.Component {
     if (this.props.block) {
       rootClassNames = rootClassNames.concat([ 'ad-panel__container--block' ]);
     }
-    if (this.props.animated) {
-      rootClassNames = rootClassNames.concat([ 'ad-panel__animated' ]);
-    }
     if (this.props.className) {
       rootClassNames = rootClassNames.concat([ this.props.className ]);
     }
@@ -312,11 +311,8 @@ if (process.env.NODE_ENV !== 'production') {
     })
   );
   AdPanel.propTypes = {
-    animated: React.PropTypes.bool,
     adTag: React.PropTypes.string.isRequired,
     className: React.PropTypes.string,
-    lazyLoad: React.PropTypes.bool,
-    lazyLoadMargin: React.PropTypes.number,
     sizes: React.PropTypes.arrayOf(sizeObject),
     sizeMapping: React.PropTypes.arrayOf(
       React.PropTypes.arrayOf(

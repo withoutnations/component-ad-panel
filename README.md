@@ -25,11 +25,8 @@ For more examples on usage, see [`src/example.es6`](./src/example.es6).
 
 ## Props and defaults:
 
- * `animated={true}` (boolean): when the ad enters the screen, it animates upwards.
  * `adTag` (required string): The DFP tag this points to. Often in the format of a URL. example: `/5605/foo.bar/qux/x`.
  * `className` (string): Add this className to ad-panel__container.
- * `lazyLoad={true}` (boolean): Don't load the ad until it's close to the screen.
- * `lazyLoadMargin={350}` (number of px): How close to the screen does the ad need to be to be loaded by `lazyLoad`.
  * ```
   sizes={[
       [ 60, 60 ],
