@@ -51,6 +51,21 @@ For more examples on usage, see [`src/example.es6`](./src/example.es6).
  * [understanding sizeMappings](https://support.google.com/dfp_premium/answer/3423562)
 
 
+## Deprecation notice
+
+The `lazyload` prop has been removed as the feature was making this component unmaintainable and bug-prone. From now on you can use the excellent [react-lazy-load](https://github.com/loktar00/react-lazy-load/). Here's an example:
+
+```
+// Before:
+<AdPanel lazyLoad {...otherProps} />
+
+// After:
+<LazyLoad>
+  <AdPanel {...otherProps} />
+</LazyLoad>
+```
+
+Both work exactly the same.
 
 ## Install
 
