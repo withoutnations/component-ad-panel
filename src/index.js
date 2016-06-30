@@ -64,10 +64,11 @@ export default class AdPanel extends React.Component {
       const pubAds = googleTag.pubads();
       const targeting = adPanelConfig.targeting;
       // Set targeting
-      pubAds.setTargeting('subs', targeting.subscriber);
 
-      if (targeting.etear) {
-        pubAds.setTargeting('etear', targeting.etear);
+      for (const targetingKey in targeting) {
+        if (targeting.hasOwnProperty(targetingKey)) {
+          pubAds.setTargeting(targetingKey, targeting[targetingKey]);
+        }
       }
 
       if (adPanelConfig.sra) {
