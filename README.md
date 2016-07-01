@@ -65,6 +65,30 @@ The `lazyload` prop has been removed as the feature was making this component un
 </LazyLoad>
 ```
 
+The `animated` prop has also been removed, and its relevant CSS with it. This feature can also be implemented very easily using LazyLoad (and some classNames):
+
+```
+// Before:
+<AdPanel animated {...otherProps} />
+
+// After:
+class AnimatedAd extends React.Component {
+  render() {
+    const className = this.state && this.state.visible ?
+      'animated-ad-wrapper animated-ad-wrapper--visible' :
+      'animated-ad-wrapper';
+    return (
+      <div className={className}>
+        <LazyLoad onContentVisible={() => { this.setState({ visible: true }) }}>
+          <AdPanel {...this.props} />
+        </LazyLoad>
+      </div>
+    )
+  }
+}
+<AnimatedAd {...otherProps} />
+```
+
 Both work exactly the same.
 
 ## Install
