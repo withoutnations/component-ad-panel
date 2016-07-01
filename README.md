@@ -25,11 +25,8 @@ For more examples on usage, see [`src/example.es6`](./src/example.es6).
 
 ## Props and defaults:
 
- * `animated={true}` (boolean): when the ad enters the screen, it animates upwards.
  * `adTag` (required string): The DFP tag this points to. Often in the format of a URL. example: `/5605/foo.bar/qux/x`.
  * `className` (string): Add this className to ad-panel__container.
- * `lazyLoad={true}` (boolean): Don't load the ad until it's close to the screen.
- * `lazyLoadMargin={350}` (number of px): How close to the screen does the ad need to be to be loaded by `lazyLoad`.
  * ```
   sizes={[
       [ 60, 60 ],
@@ -54,6 +51,45 @@ For more examples on usage, see [`src/example.es6`](./src/example.es6).
  * [understanding sizeMappings](https://support.google.com/dfp_premium/answer/3423562)
 
 
+## Deprecation notice
+
+The `lazyload` prop has been removed as the feature was making this component unmaintainable and bug-prone. From now on you can use the excellent [react-lazy-load](https://github.com/loktar00/react-lazy-load/). Here's an example:
+
+```
+// Before:
+<AdPanel lazyLoad {...otherProps} />
+
+// After:
+<LazyLoad>
+  <AdPanel {...otherProps} />
+</LazyLoad>
+```
+
+The `animated` prop has also been removed, and its relevant CSS with it. This feature can also be implemented very easily using LazyLoad (and some classNames):
+
+```
+// Before:
+<AdPanel animated {...otherProps} />
+
+// After:
+class AnimatedAd extends React.Component {
+  render() {
+    const className = this.state && this.state.visible ?
+      'animated-ad-wrapper animated-ad-wrapper--visible' :
+      'animated-ad-wrapper';
+    return (
+      <div className={className}>
+        <LazyLoad onContentVisible={() => { this.setState({ visible: true }) }}>
+          <AdPanel {...this.props} />
+        </LazyLoad>
+      </div>
+    )
+  }
+}
+<AnimatedAd {...otherProps} />
+```
+
+Both work exactly the same.
 
 ## Install
 

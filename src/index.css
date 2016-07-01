@@ -64,14 +64,3 @@
 
 /* stylelint-enable selector-no-type */
 
-.ad-panel__animated {
-  opacity: 0;
-  transform: translateY(100px);
-  transition: all 0.4s ease-out 0.5s;
-  transition-property: opacity, transform;
-}
-
-.ad-panel__animated.ad-panel--visible {
-  opacity: 1;
-  transform: translateY(0);
-}

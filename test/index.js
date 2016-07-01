@@ -40,9 +40,14 @@ function createFakeGoogleTag() {
 
 describe('AdPanel', () => {
   let googleTag = null;
+  const originalGetOrCreateGoogleTag = AdPanel.getOrCreateGoogleTag;
   beforeEach(() => {
     googleTag = createFakeGoogleTag();
     AdPanel.getOrCreateGoogleTag = chai.spy(() => googleTag);
+  });
+  afterEach(() => {
+    AdPanel.config({ });
+    AdPanel.getOrCreateGoogleTag = originalGetOrCreateGoogleTag;
   });
 
   it('renders a React element', () => {
@@ -83,7 +88,7 @@ describe('AdPanel', () => {
   describe('lifecycle methods', () => {
     let instance = null;
     beforeEach(() => {
-      instance = new AdPanel({ adTag: 'test-ad-tag', lazyLoad: true });
+      instance = new AdPanel({ adTag: 'test-ad-tag' });
       instance.refs = {};
       instance.state = {};
       instance.generateAd = chai.spy('generateAd');
@@ -92,48 +97,11 @@ describe('AdPanel', () => {
 
     describe('componentDidMount', () => {
 
-      beforeEach(() => {
-        // Remove actual loadElementWhenInView function
-        instance.loadElementWhenInView = chai.spy('loadElementWhenInView');
-      });
-
       it('calls generateAd', () => {
         instance.state = { tagId: true };
         instance.componentDidMount();
         instance.generateAd
           .should.have.been.called.exactly(1);
-      });
-
-      // This is broken on master too
-      it.skip('adds loadElementWhenInView() to scroll event listener', () => {
-        chai.spy.on(window, 'addEventListener');
-
-        instance.componentDidMount();
-
-        window.addEventListener
-          .should.have.been.called.with('scroll', instance.loadElementWhenInView);
-
-        Reflect.deleteProperty(window, 'addEventListener');
-      });
-
-      // This is broken on master too
-      it.skip('adds loadElementWhenInView() to resize event listener', () => {
-        chai.spy.on(window, 'addEventListener');
-
-        instance.componentDidMount();
-
-        window.addEventListener
-          .should.have.been.called.with('resize', instance.loadElementWhenInView);
-
-        Reflect.deleteProperty(window, 'addEventListener');
-      });
-
-      it('calls loadElementWhenInView', () => {
-        chai.spy.on(instance, 'loadElementWhenInView');
-        instance.componentDidMount();
-
-        instance.loadElementWhenInView
-          .should.have.been.called();
       });
 
     });
@@ -152,7 +120,6 @@ describe('AdPanel', () => {
           [ 'baz', 'qux' ],
         ];
         googleTag = createFakeGoogleTag();
-        AdPanel.getOrCreateGoogleTag = chai.spy(() => googleTag);
       });
 
       it('uses the googletag API to add sizes and targeting options', () => {
@@ -266,122 +233,60 @@ describe('AdPanel', () => {
       });
     });
 
-    describe('cleanupEventListeners', () => {
-      it('removes loadElementWhenInView() from the scroll event', () => {
-        chai.spy.on(window, 'removeEventListener');
-
-        instance.cleanupEventListeners();
-
-        window.removeEventListener
-          .should.have.been.called.with('scroll', instance.loadElementWhenInView);
-
-        Reflect.deleteProperty(window, 'removeEventListener');
+    describe('componentWillUpdate', () => {
+      beforeEach(() => {
+        instance.adSlot = 'this-has-already-loaded';
+        instance.destroySlot = chai.spy();
+        instance.defineSlot = chai.spy();
+        instance.props.adTag = 'fake-ad-tag';
+        instance.props.sizes = [ [ 42, 42 ] ];
       });
-
-      it('removes loadElementWhenInView() from resize event listener', () => {
-        chai.spy.on(window, 'removeEventListener');
-
-        instance.cleanupEventListeners();
-
-        window.removeEventListener
-          .should.have.been.called.exactly(2);
-        window.removeEventListener
-          .should.have.been.called.with('resize', instance.loadElementWhenInView);
-
-        Reflect.deleteProperty(window, 'removeEventListener');
+      it('calls defineSlot', () => {
+        instance.componentWillUpdate({ adTag: 'new-ad-tag' });
+        instance.componentWillUpdate({ sizes: [ [ 10, 10 ] ] });
+        instance.defineSlot.should.have.been.called.twice();
       });
-
+      it('calls nothing if an irrelevant prop changed', () => {
+        instance.componentWillUpdate({ className: 'dont care about me' });
+        instance.defineSlot.should.not.have.been.called();
+      });
+      it('calls nothing if the prop didn\'t exist before', () => {
+        Reflect.deleteProperty(instance.props, 'adTag');
+        instance.componentWillUpdate({ adTag: 'brand-new-tag!' });
+        instance.defineSlot.should.not.have.been.called();
+      });
+      it('does nothing if there is no adSlot', () => {
+        instance.adSlot = null;
+        instance.componentWillUpdate({ adTag: 'ad-tag!' });
+        instance.defineSlot.should.not.have.been.called();
+      });
     });
 
     describe('componentWillUnmount', () => {
+      let previousGoogleTag = null;
+      before(() => {
+        previousGoogleTag = window.googletag;
+      });
+      after(() => {
+        if (previousGoogleTag !== null) {
+          window.googletag = previousGoogleTag;
+        }
+      });
 
-      it('calls cleanupEventListeners', () => {
-        chai.spy.on(instance, 'cleanupEventListeners');
+      it('calls cleanupEventListeners and destroySlot', () => {
+        // Get through the if (typeof window.googletag !== 'undefined') check
+        window.googletag = 'fake';
+        instance.cleanupEventListeners = chai.spy();
+
+        instance.destroySlot = chai.spy();
 
         instance.componentWillUnmount();
 
         instance.cleanupEventListeners
           .should.have.been.called();
-      });
 
-    });
-
-    describe('loadElementWhenInView', () => {
-
-      beforeEach(() => {
-        instance.isElementInViewport = chai.spy('isElementInViewport');
-        instance.generateAd = chai.spy('generateAd');
-        instance.cleanupEventListeners = chai.spy('cleanupEventListeners');
-        instance.getContainerDomElement = chai.spy(() => ({ className: '' }));
-      });
-
-      it('calls isElementInViewport', () => {
-        instance.refs.container = { fake: 'element' };
-        instance.loadElementWhenInView();
-        instance.isElementInViewport.should.have.been.called.with(instance.refs.container);
-      });
-
-      describe('When the component is not near the view at all', () => {
-
-        beforeEach(() => {
-          instance.isElementInViewport = () => false;
-        });
-
-        it('calls nothing', () => {
-          instance.loadElementWhenInView();
-          instance.generateAd.should.not.have.been.called();
-          instance.cleanupEventListeners.should.not.have.been.called();
-          instance.getContainerDomElement.should.not.have.been.called();
-        });
-
-      });
-
-      describe('When the component is near the view, but not inside', () => {
-
-        beforeEach(() => {
-          instance.isElementInViewport = (...args) => {
-            args.length.should.be.at.least(1).and.at.most(2);
-            return args.length === 2;
-          };
-        });
-
-        it('Doesn\'t call cleanupEventListeners, because we still need to listen to the scroll event', () => {
-          instance.loadElementWhenInView();
-          instance.cleanupEventListeners.should.not.have.been.called();
-        });
-
-        it('Calls generateAd()', () => {
-          instance.loadElementWhenInView();
-          instance.generateAd.should.have.been.called();
-        });
-
-        it('If the ad was already generated, calls nothing', () => {
-          instance.state.adGenerated = true;
-          instance.loadElementWhenInView();
-          instance.generateAd.should.not.have.been.called();
-        });
-
-      });
-      describe('When the component is inside the viewport', () => {
-        let fakeElement = null;
-        beforeEach(() => {
-          instance.isElementInViewport = () => true;
-          instance.getContainerDomElement = chai.spy(() => fakeElement);
-          fakeElement = { className: '' };
-        });
-
-        it('Calls generateAd() and cleanupEventListeners()', () => {
-          instance.loadElementWhenInView();
-          instance.generateAd.should.have.been.called();
-          instance.cleanupEventListeners.should.have.been.called();
-        });
-
-        it('Adds the ad-panel--visible class to the container element', () => {
-          instance.loadElementWhenInView();
-          instance.getContainerDomElement.should.have.been.called();
-          fakeElement.className.should.equal(' ad-panel--visible');
-        });
-
+        instance.destroySlot
+          .should.have.been.called();
       });
 
     });
