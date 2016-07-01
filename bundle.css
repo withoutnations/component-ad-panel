@@ -65,21 +65,3 @@
 }
 
 /* stylelint-enable selector-no-type */
-
-.ad-panel__animated {
-  opacity: 0;
-  -webkit-transform: translateY(100px);
-          transform: translateY(100px);
-  -webkit-transition: all 0.4s ease-out 0.5s;
-  transition: all 0.4s ease-out 0.5s;
-  -webkit-transition-property: opacity, -webkit-transform;
-  transition-property: opacity, -webkit-transform;
-  transition-property: opacity, transform;
-  transition-property: opacity, transform, -webkit-transform;
-}
-
-.ad-panel__animated.ad-panel--visible {
-  opacity: 1;
-  -webkit-transform: translateY(0);
-          transform: translateY(0);
-}

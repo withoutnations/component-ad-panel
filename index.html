@@ -195,7 +195,7 @@ pre[class*&#x3D;&quot;language-&quot;] {
   <body>
         <h1 class="component-title">
       @economist/component-ad-panel
-      <span>(v2.4.0)</span>
+      <span>(v3.0.0)</span>
     </h1>
     <div id="component-preview">
       <script>
@@ -228,11 +228,8 @@ pre[class*&#x3D;&quot;language-&quot;] {
     <p>For more examples on usage, see <a href="./src/example.es6"><code>src/example.es6</code></a>.</p>
     <h2>Props and defaults:</h2>
     <ul>
-    <li><code>animated={true}</code> (boolean): when the ad enters the screen, it animates upwards.</li>
     <li><code>adTag</code> (required string): The DFP tag this points to. Often in the format of a URL. example: <code>/5605/foo.bar/qux/x</code>.</li>
     <li><code>className</code> (string): Add this className to ad-panel__container.</li>
-    <li><code>lazyLoad={true}</code> (boolean): Don't load the ad until it's close to the screen.</li>
-    <li><code>lazyLoadMargin={350}</code> (number of px): How close to the screen does the ad need to be to be loaded by <code>lazyLoad</code>.</li>
     <li><pre><code></code></pre></li>
     </ul>
     <p>sizes={[
@@ -260,6 +257,38 @@ pre[class*&#x3D;&quot;language-&quot;] {
     <li><a href="https://developers.google.com/doubleclick-gpt/reference">The window.googletag API</a></li>
     <li><a href="https://support.google.com/dfp_premium/answer/3423562">understanding sizeMappings</a></li>
     </ul>
+    <h2>Deprecation notice</h2>
+    <p>The <code>lazyload</code> prop has been removed as the feature was making this component unmaintainable and bug-prone. From now on you can use the excellent <a href="https://github.com/loktar00/react-lazy-load/">react-lazy-load</a>. Here's an example:</p>
+    <pre><code>// Before:
+    &lt;AdPanel lazyLoad {...otherProps} /&gt;
+    
+    // After:
+    &lt;LazyLoad&gt;
+      &lt;AdPanel {...otherProps} /&gt;
+    &lt;/LazyLoad&gt;
+    </code></pre>
+    <p>The <code>animated</code> prop has also been removed, and its relevant CSS with it. This feature can also be implemented very easily using LazyLoad (and some classNames):</p>
+    <pre><code>// Before:
+    &lt;AdPanel animated {...otherProps} /&gt;
+    
+    // After:
+    class AnimatedAd extends React.Component {
+      render() {
+        const className = this.state &amp;&amp; this.state.visible ?
+          'animated-ad-wrapper animated-ad-wrapper--visible' :
+          'animated-ad-wrapper';
+        return (
+          &lt;div className={className}&gt;
+            &lt;LazyLoad onContentVisible={() =&gt; { this.setState({ visible: true }) }}&gt;
+              &lt;AdPanel {...this.props} /&gt;
+            &lt;/LazyLoad&gt;
+          &lt;/div&gt;
+        )
+      }
+    }
+    &lt;AnimatedAd {...otherProps} /&gt;
+    </code></pre>
+    <p>Both work exactly the same.</p>
     <h2>Install</h2>
     <pre><code class="lang-bash">npm i -S @economist/component-ad-panel
     </code></pre>
