@@ -35,9 +35,15 @@ function displayAdsFn(googleTag) {
   }
   googleTag.enableServices();
   adDivs.forEach((div) => {
-    googleTag.display(div);
+    googleTag.display(div.id);
   });
 
+  if (adPanelConfig.sra) {
+    // since we disabled initial load (see https://support.google.com/dfp_premium/answer/4578089?hl=en on
+    // 'pages with infinite content'), when we update the slots we need to invoke a refresh on them to actually
+    // fetch the ads (display() in this case only register the slot as ready without fetching anything)
+    googleTag.pubads().refresh(adDivs.map((slotInfo) => (slotInfo.slot)));
+  }
   // Clean up
   adDivs.length = 0;
 }
@@ -69,6 +75,11 @@ export default class AdPanel extends React.Component {
 
       if (adPanelConfig.sra) {
         // enables Single Request Architecture (SRA)
+        // SRA would require all slots to be defined before calling enableServices().
+        // To implement incremental loading (like when using the 'Load More' button) we need to
+        // disable the initial load and use refresh() to actually fetch them instead
+        // (see https://support.google.com/dfp_premium/answer/4578089?hl=en on 'pages with infinite content')
+        pubAds.disableInitialLoad();
         pubAds.enableSingleRequest();
       }
 
@@ -160,6 +171,11 @@ export default class AdPanel extends React.Component {
       window.googletag.destroySlots([ this.adSlot ]);
     }
     this.adSlot = null;
+    // remove this slot from the adDivs
+    const idxToRemove = adDivs.findIndex((slot) => (slot.id));
+    if (idxToRemove >= 0) {
+      adDivs.splice(idxToRemove, 1);
+    }
   }
 
   cleanupEventListeners() {
@@ -244,7 +260,7 @@ export default class AdPanel extends React.Component {
     }
     const pubAds = googleTag.pubads();
     if (adPanelConfig.sra) {
-      adDivs.push(tagId);
+      adDivs.push({ id: tagId, slot: this.adSlot });
       if (typeof this.props.onSlotDefined === 'function') {
         this.props.onSlotDefined(tagId);
       }
@@ -304,30 +320,37 @@ export default class AdPanel extends React.Component {
 }
 
 if (process.env.NODE_ENV !== 'production') {
-  const sizeObject = React.PropTypes.oneOf(
-    React.PropTypes.arrayOf(React.PropTypes.number),
-    React.PropTypes.shape({
-      width: React.PropTypes.number,
-      height: React.PropTypes.number,
-    })
-  );
+  /* eslint-disable id-blacklist */
+  const { string, arrayOf, oneOfType, shape, number, func, bool } = React.PropTypes;
+  const sizeObject = oneOfType([
+    string,
+    arrayOf(number),
+    shape({
+      width: number,
+      height: number,
+    }),
+  ]);
   AdPanel.propTypes = {
-    adTag: React.PropTypes.string.isRequired,
-    className: React.PropTypes.string,
-    sizes: React.PropTypes.arrayOf(sizeObject),
-    sizeMapping: React.PropTypes.arrayOf(
-      React.PropTypes.arrayOf(
-        sizeObject
+    adTag: string.isRequired,
+    className: string,
+    sizes: arrayOf(sizeObject),
+    sizeMapping: arrayOf(
+      arrayOf(
+        oneOfType([
+          sizeObject,
+          arrayOf(sizeObject),
+        ])
       )
     ),
-    onFailure: React.PropTypes.func,
-    onSlotDefined: React.PropTypes.func,
-    targeting: React.PropTypes.arrayOf(React.PropTypes.arrayOf(sizeObject)),
-    reserveHeight: React.PropTypes.number,
-    styled: React.PropTypes.bool,
-    block: React.PropTypes.bool,
-    onSlotRenderEnded: React.PropTypes.func,
-    onSlotVisibilityChanged: React.PropTypes.func,
-    onImpressionViewable: React.PropTypes.func,
+    onFailure: func,
+    onSlotDefined: func,
+    targeting: arrayOf(arrayOf(sizeObject)),
+    reserveHeight: number,
+    styled: bool,
+    block: bool,
+    onSlotRenderEnded: func,
+    onSlotVisibilityChanged: func,
+    onImpressionViewable: func,
   };
+  /* eslint-enable id-blacklist */
 }

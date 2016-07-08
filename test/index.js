@@ -18,6 +18,7 @@ function createFakeGoogleTag() {
     setTargeting: chai.spy(() => slotApi),
   };
   const pubadsApi = {
+    disableInitialLoad: chai.spy(() => null),
     enableSingleRequest: chai.spy(() => null),
     collapseEmptyDivs: chai.spy(() => null),
     addEventListener: chai.spy(),
@@ -51,7 +52,7 @@ describe('AdPanel', () => {
   });
 
   it('renders a React element', () => {
-    React.isValidElement(<AdPanel />).should.equal(true);
+    React.isValidElement(<AdPanel adTag="foo" />).should.equal(true);
   });
 
   describe('Rendering', () => {
@@ -120,6 +121,22 @@ describe('AdPanel', () => {
           [ 'baz', 'qux' ],
         ];
         googleTag = createFakeGoogleTag();
+      });
+
+      it('disable initial loading to allow for incremental loading of ads', () => {
+        AdPanel.config(
+          {
+            sra: true,
+            targeting: {
+              etear: 'etear',
+              subscriber: 'subscriber',
+            },
+          }
+        );
+        googleTag.cmd.forEach((callback) => callback());
+        const pubAds = googleTag.pubads();
+        pubAds.disableInitialLoad.should.have.been.called();
+        pubAds.enableSingleRequest.should.have.been.called();
       });
 
       it('uses the googletag API to add sizes and targeting options', () => {
