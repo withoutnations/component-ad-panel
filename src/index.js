@@ -307,12 +307,19 @@ export default class AdPanel extends React.Component {
     if (this.props.className) {
       rootClassNames = rootClassNames.concat([ this.props.className ]);
     }
+    const props = {
+      ref: 'container',
+      className: rootClassNames.join(' '),
+    };
     const aria = {
       role: 'complementary',
       itemScope: 'https://schema.org/WPAdBlock',
     };
+    if (this.props.inlineStyle) {
+      props.style = this.props.inlineStyle;
+    }
     return (
-      <div ref="container" className={rootClassNames.join(' ')} {...aria}>
+      <div {...props} {...aria}>
         {tag}
       </div>
     );
@@ -347,6 +354,9 @@ if (process.env.NODE_ENV !== 'production') {
     targeting: arrayOf(arrayOf(sizeObject)),
     reserveHeight: number,
     styled: bool,
+    inlineStyle: shape({
+      height: string,
+    }),
     block: bool,
     onSlotRenderEnded: func,
     onSlotVisibilityChanged: func,
