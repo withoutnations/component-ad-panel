@@ -122,18 +122,8 @@ export default class AdPanel extends React.Component {
     this.unlistenSlotRenderEnded = () => null;
   }
 
-  componentWillMount() {
-    this.setState({
-      tagId: `googlead-${ uniqueId() }`,
-      adGenerated: false,
-      adFailed: false,
-    });
-  }
-
   componentDidMount() {
-    if (this.state && this.state.tagId) {
-      this.generateAd();
-    }
+    this.generateAd();
   }
 
   componentWillUpdate(nextProps) {
@@ -245,10 +235,18 @@ export default class AdPanel extends React.Component {
         }
       }
     });
-    this.setState({ adGenerated: true });
   }
 
   defineSlot(googleTag) {
+    this.setState({
+      tagId: `googlead-${ uniqueId() }`,
+      adFailed: false,
+    }, () => {
+      this.onTagIDUpdated(googleTag);
+    });
+  }
+
+  onTagIDUpdated(googleTag) {
     const sizeMapping = this.buildSizeMapping();
     const { adTag, sizes } = this.props;
     const { tagId } = this.state;
@@ -282,21 +280,18 @@ export default class AdPanel extends React.Component {
     if (this.state && this.state.adFailed) {
       return (<div />);
     }
-    let tag = [];
-    if (this.state && this.state.tagId) {
-      let adStyle = {};
-      if (this.props.reserveHeight) {
-        adStyle = { minHeight: this.props.reserveHeight };
-      }
-      tag = (
-        <div
-          className="ad-panel__googlead"
-          id={this.state.tagId}
-          style={adStyle}
-          title="Advertisement"
-        ></div>
-      );
+    let adStyle = {};
+    if (this.props.reserveHeight) {
+      adStyle = { minHeight: this.props.reserveHeight };
     }
+    const tag = (
+      <div
+        className="ad-panel__googlead"
+        id={this.state && this.state.tagId}
+        style={adStyle}
+        title="Advertisement"
+      ></div>
+    );
     let rootClassNames = [ 'ad-panel__container' ];
     if (this.props.styled) {
       rootClassNames = rootClassNames.concat([ 'ad-panel__container--styled' ]);
