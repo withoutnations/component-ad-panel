@@ -68,22 +68,9 @@ describe('AdPanel', () => {
 
     it('ad is generated once mounted', () => {
       rendered.setState({ tagId: true });
-      rendered.should.have.state('adGenerated', true);
       googleTag.cmd.should.have.lengthOf(1)
         .and.have.property(0).that.is.a('function');
     });
-
-    describe('after ad generation', () => {
-
-      it('ad is generated once mounted', () => {
-        rendered.setState({ tagId: true });
-        rendered.should.have.state('adGenerated', true);
-        googleTag.cmd.should.have.lengthOf(1)
-          .and.have.property(0).that.is.a('function');
-      });
-
-    });
-
   });
 
   describe('lifecycle methods', () => {
@@ -149,11 +136,8 @@ describe('AdPanel', () => {
             },
           }
         );
-        instance.generateAd();
-        instance.setState.should.have.been.called.with({ adGenerated: true });
-        googleTag.cmd.should.have.lengthOf(2);
-        googleTag.cmd.forEach((callback) => callback());
         const sizeMapping = googleTag.sizeMapping();
+        instance.onTagIDUpdated(googleTag);
         sizeMapping.addSize.should.have.been.called.with([ 800, 600 ], [ [ 300, 250 ] ]);
         sizeMapping.build.should.have.been.called();
         const adSlot = googleTag.defineSlot();
@@ -162,15 +146,11 @@ describe('AdPanel', () => {
         adSlot.setTargeting.should.have.been.called.with('baz', 'qux');
         const pubAds = googleTag.pubads();
         pubAds.setTargeting.should.have.been.called.exactly(2);
-        pubAds.enableSingleRequest.should.have.been.called();
-        pubAds.collapseEmptyDivs.should.have.been.called();
       });
 
       it('binds props.onImpressionViewable to impressionViewable if available', () => {
         const onImpressionViewable = instance.props.onImpressionViewable = chai.spy();
-        instance.generateAd();
-        googleTag.cmd.should.have.lengthOf(1);
-        googleTag.cmd.forEach((callback) => callback());
+        instance.onTagIDUpdated(googleTag);
         googleTag.pubads().addEventListener
           .should.have.been.called.at.least(1)
           .with('impressionViewable', onImpressionViewable);
@@ -178,9 +158,7 @@ describe('AdPanel', () => {
 
       it('binds props.onSlotVisibilityChanged to slotVisibilityChanged if available', () => {
         const onSlotVisibilityChanged = instance.props.onSlotVisibilityChanged = chai.spy();
-        instance.generateAd();
-        googleTag.cmd.should.have.lengthOf(1);
-        googleTag.cmd.forEach((callback) => callback());
+        instance.onTagIDUpdated(googleTag);
         googleTag.pubads().addEventListener
           .should.have.been.called.at.least(1)
           .with('slotVisibilityChanged', onSlotVisibilityChanged);
@@ -191,12 +169,8 @@ describe('AdPanel', () => {
         let slotRenderEndedEventListener = null;
         let slotData = null;
         beforeEach(() => {
-          instance.generateAd();
-          googleTag.cmd.should.have.lengthOf(1);
-          googleTag.cmd.forEach((callback) => callback());
+          instance.onTagIDUpdated(googleTag);
           pubAds = googleTag.pubads();
-          googleTag.cmd.should.have.lengthOf(1);
-          googleTag.cmd.forEach((callback) => callback());
           chai.spy.on(instance, 'unlistenSlotRenderEnded');
           chai.spy.on(instance, 'cleanupEventListeners');
           slotRenderEndedEventListener = getSpyCall(pubAds.addEventListener, 0)[1];
