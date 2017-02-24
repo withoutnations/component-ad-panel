@@ -104,16 +104,20 @@ export default class AdPanel extends React.Component {
     if (typeof window === 'undefined' || typeof window.document === 'undefined') {
       return null;
     }
-    if (window.googletag) {
-      return window.googletag;
+    window.gptScriptInserted = window.gptScriptInserted || false;
+    window.googletag = window.googletag || {};
+    const googletag = window.googletag;
+    if (googletag.apiReady || window.gptScriptInserted) {
+      return googletag;
     }
-    window.googletag = { cmd: [] };
+    googletag.cmd = googletag.cmd || [];
     const gads = document.createElement('script');
     gads.async = true;
     gads.type = 'text/javascript';
     const useSsl = window.location.protocol === 'https:';
     gads.src = `${ useSsl ? 'https:' : 'http:' }//www.googletagservices.com/tag/js/gpt.js`;
     window.document.head.appendChild(gads);
+    window.gptScriptInserted = true;
     return window.googletag;
   }
 
