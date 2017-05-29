@@ -311,6 +311,7 @@ export default class AdPanel extends React.Component {
       className: rootClassNames.join(' '),
     };
     const aria = {
+      'aria-label': 'Advertisement',
       role: 'complementary',
       itemScope: 'https://schema.org/WPAdBlock',
     };
