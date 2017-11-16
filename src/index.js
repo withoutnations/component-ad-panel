@@ -1,6 +1,7 @@
 /* global window: false */
 /* global document: false */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 function heightWidthPair(hwPair) {
   if (Array.isArray(hwPair) && hwPair.length === 0) {
@@ -328,7 +329,7 @@ export default class AdPanel extends React.Component {
 
 if (process.env.NODE_ENV !== 'production') {
   /* eslint-disable id-blacklist */
-  const { string, arrayOf, oneOfType, shape, number, func, bool } = React.PropTypes;
+  const { string, arrayOf, oneOfType, shape, number, func, bool } = PropTypes;
   const sizeObject = oneOfType([
     string,
     arrayOf(number),

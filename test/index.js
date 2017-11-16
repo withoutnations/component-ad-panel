@@ -2,10 +2,13 @@
 import 'babel-polyfill';
 import AdPanel from '../src';
 import React from 'react';
+import Enzyme from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
 import chai from 'chai';
 import chaiEnzyme from 'chai-enzyme';
 import chaiSpies from 'chai-spies';
 import { mount } from 'enzyme';
+Enzyme.configure({ adapter: new Adapter() });
 chai.use(chaiEnzyme()).use(chaiSpies).should();
 function getSpyCall(spy, callNum = 0) {
   return spy.__spy.calls[callNum]; // eslint-disable-line id-match, no-underscore-dangle
@@ -67,7 +70,7 @@ describe('AdPanel', () => {
     });
 
     it('ad is generated once mounted', () => {
-      rendered.setState({ tagId: true });
+      rendered.setState({ tagId: 'some-tag-id' });
       googleTag.cmd.should.have.lengthOf(1)
         .and.have.property(0).that.is.a('function');
     });
@@ -86,7 +89,7 @@ describe('AdPanel', () => {
     describe('componentDidMount', () => {
 
       it('calls generateAd', () => {
-        instance.state = { tagId: true };
+        instance.state = { tagId: 'some-tag-id' };
         instance.componentDidMount();
         instance.generateAd
           .should.have.been.called.exactly(1);
